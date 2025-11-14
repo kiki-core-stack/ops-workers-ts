@@ -1,0 +1,26 @@
+{
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "bun run build:internal --outdir=./dist",
+    "build:internal": "rimraf ./dist && cross-env NODE_ENV=production bun --env-file=./.env.production.local build ./src/index.ts --minify --production --target bun",
+    "compile": "bun run build:internal --compile --outfile ./dist/index",
+    "depcheck": "depcheck",
+    "dev": "cross-env NODE_ENV=development bun --env-file=./.env.development.local --watch run ./src/index.ts",
+    "lint": "eslint --max-warnings 0",
+    "lint:fix": "eslint --fix --max-warnings 0",
+    "typecheck": "tsc",
+    "unused-exports": "ts-unused-exports ./tsconfig.json"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@kikiutils/eslint-config": "^1.2.7",
+    "@kikiutils/tsconfigs": "^5.0.4",
+    "@types/bun": "^1.2.18",
+    "cross-env": "^7.0.3",
+    "depcheck": "^1.4.7",
+    "rimraf": "^6.0.1",
+    "ts-unused-exports": "^11.0.1",
+    "typescript": "^5.8.3"
+  }
+}

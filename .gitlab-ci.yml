@@ -1,0 +1,91 @@
+stages:
+  - check
+  # - release
+
+# Anchors
+
+.bun-cache: &bun-cache
+  cache:
+    key: bun-cache
+    paths:
+      - ./.cache/bun/install/cache
+
+.setup-bun-and-install-dependencies: &setup-bun-and-install-dependencies
+  - |
+    echo '[install.cache]' >~/.bunfig.toml
+    echo 'dir = "./.cache/bun/install/cache"' >>~/.bunfig.toml
+  - bun i --frozen-lockfile
+
+# Jobs
+
+# stage: check
+lint:
+  stage: check
+  image: oven/bun:alpine
+
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
+      when: always
+    - when: never
+
+  <<: *bun-cache
+
+  before_script: *setup-bun-and-install-dependencies
+
+  script:
+    - bun run lint
+
+# stage: check
+typecheck:
+  stage: check
+  image: oven/bun:alpine
+
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
+      when: always
+    - when: never
+
+  <<: *bun-cache
+
+  before_script: *setup-bun-and-install-dependencies
+
+  script:
+    - bun run typecheck
+
+# stage: check
+build:
+  stage: check
+  image: oven/bun:alpine
+
+  rules:
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
+      when: always
+    - when: never
+
+  <<: *bun-cache
+
+  before_script: *setup-bun-and-install-dependencies
+
+  script:
+    - bun run build
+
+# stage: release
+# release:
+#   stage: release
+#   image: node:24-alpine
+
+#   only:
+#     - main
+
+#   before_script:
+#     - apk update && apk upgrade && apk add git
+#     - |
+#       npm i -g \
+#         semantic-release@latest \
+#         @semantic-release/changelog@latest \
+#         @semantic-release/git@latest \
+#         @semantic-release/gitlab@latest \
+#         conventional-changelog-conventionalcommits@latest
+
+#   script:
+#     - semantic-release
