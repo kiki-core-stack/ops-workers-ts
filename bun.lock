@@ -22,6 +22,7 @@
         "depcheck": "latest",
         "rimraf": "latest",
         "ts-unused-exports": "latest",
+        "type-fest": "latest",
         "typescript": "latest",
       },
     },

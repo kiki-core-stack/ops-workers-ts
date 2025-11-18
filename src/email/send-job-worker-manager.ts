@@ -5,19 +5,21 @@ import { redisClient as globalRedisClient } from '@kiki-core-stack/pack/constant
 import { EmailPlatformModel } from '@kiki-core-stack/pack/models/email/platform';
 import { EmailSendRecordModel } from '@kiki-core-stack/pack/models/email/send-record';
 import type { EmailSendRecordDocument } from '@kiki-core-stack/pack/models/email/send-record';
-import { consola as logger } from 'consola';
 import { Types } from 'mongoose';
 import type { UpdateQuery } from 'mongoose';
-import Mutex from 'p-mutex';
+
+import { BaseServiceLifecycle } from '@/base-service-lifecycle';
 
 import { createEmailServiceProviderInstance } from './service-providers';
 
-export class EmailSendJobWorkerManager {
+export class EmailSendJobWorkerManager extends BaseServiceLifecycle {
     // Private properties
     readonly #concurrency = Math.abs(Number(process.env.EMAIL_SEND_JOB_WORKER_CONCURRENCY)) || 4;
-    readonly #operateLock = new Mutex();
-    #status: 'running' | 'stopped' | 'stopping' = 'stopped';
     readonly #workers: { promise: Promise<void>; redisClient: RedisClient }[] = [];
+
+    constructor() {
+        super('[EmailSendJobWorkerManager]');
+    }
 
     // Private methods
     async #processJob(emailSendRecordId: string) {
@@ -63,7 +65,7 @@ export class EmailSendJobWorkerManager {
     }
 
     async #runLoop(redisClient: RedisClient) {
-        while (this.#status === 'running') {
+        while (this.status === 'running') {
             let emailSendRecordId: string | undefined;
             try {
                 const response = await redisClient.brpop('email:send:queue', 0);
@@ -72,7 +74,7 @@ export class EmailSendJobWorkerManager {
                 await this.#processJob(emailSendRecordId);
             } catch (error) {
                 if (!(error as Error).message.includes('Connection closed')) {
-                    logger.error('[EmailSendJobWorkerManager]', error);
+                    this.logger.error(this.loggerPrefix, error);
                 }
 
                 if (emailSendRecordId) await globalRedisClient.lpush('email:send:queue', emailSendRecordId);
@@ -81,19 +83,8 @@ export class EmailSendJobWorkerManager {
     }
 
     // Public methods
-    async start() {
-        await this.#operateLock.withLock(async () => {
-            switch (this.#status) {
-                case 'running': return;
-                case 'stopped':
-                    this.#status = 'running';
-                    break;
-                default: throw new Error('unreachable');
-            }
-
-            logger.info('[EmailSendJobWorkerManager] Starting...');
-
-            // Create workers
+    override start() {
+        return super.start(async () => {
             for (let i = 0; i < this.#concurrency; i++) {
                 const redisClient = await globalRedisClient.duplicate();
                 this.#workers.push({
@@ -101,28 +92,13 @@ export class EmailSendJobWorkerManager {
                     redisClient,
                 });
             }
-
-            logger.success('[EmailSendJobWorkerManager] Started');
         });
     }
 
-    async stop() {
-        await this.#operateLock.withLock(async () => {
-            switch (this.#status) {
-                case 'running':
-                    this.#status = 'stopping';
-                    break;
-                case 'stopped': return;
-                default: throw new Error('unreachable');
-            }
-
-            logger.info('[EmailSendJobWorkerManager] Stopping...');
-
+    override stop() {
+        return super.stop(async () => {
             this.#workers.forEach((worker) => worker.redisClient.close());
             await Promise.allSettled(this.#workers.map((worker) => worker.promise));
-            this.#status = 'stopped';
-
-            logger.info('[EmailSendJobWorkerManager] Stopped');
         });
     }
 }

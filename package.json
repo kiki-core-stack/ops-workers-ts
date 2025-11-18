@@ -31,6 +31,7 @@
     "depcheck": "^1.4.7",
     "rimraf": "^6.1.0",
     "ts-unused-exports": "^11.0.1",
+    "type-fest": "^5.2.0",
     "typescript": "^5.9.3"
   }
 }
