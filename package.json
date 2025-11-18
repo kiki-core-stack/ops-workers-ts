@@ -13,7 +13,7 @@
     "unused-exports": "ts-unused-exports ./tsconfig.json"
   },
   "dependencies": {
-    "@kiki-core-stack/pack": "^0.89.4",
+    "@kiki-core-stack/pack": "^0.89.5",
     "@kikiutils/mongoose": "^6.2.0",
     "@kikiutils/shared": "^13.6.0",
     "consola": "^3.4.2",

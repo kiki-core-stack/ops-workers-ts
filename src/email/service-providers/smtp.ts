@@ -22,6 +22,7 @@ export class EmailSmtpServiceProvider extends BaseEmailServiceProvider {
             port: config.port,
             requireTLS: config.requireTls,
             secure: config.secure,
+            tls: { rejectUnauthorized: config.rejectTlsUnauthorized },
         });
     }
 
