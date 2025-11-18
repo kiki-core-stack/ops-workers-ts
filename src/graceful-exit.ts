@@ -4,6 +4,7 @@ import { redisClient } from '@kiki-core-stack/pack/constants/redis';
 import { mongooseConnections } from '@kikiutils/mongoose/constants';
 import { logger } from '@kikiutils/shared/consola';
 
+import { emailSendJobRestorer } from '@/job-restorers';
 import { emailSendJobWorkerManager } from '@/worker-managers';
 
 let isGracefulExitStarted = false;
@@ -15,7 +16,12 @@ export async function gracefulExit(server?: Server<any>) {
     await server?.stop();
 
     // Perform operations such as closing the database connection here.
+
+    // Stop worker managers
     await emailSendJobWorkerManager.stop();
+
+    // Stop job restorers
+    await emailSendJobRestorer.stop();
 
     redisClient.close();
     await mongooseConnections.default?.close();
