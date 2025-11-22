@@ -42,7 +42,8 @@ export class EmailSendJobWorkerManager extends BaseServiceLifecycle {
                 'config',
                 'configMd5',
                 'serviceProvider',
-            ]);
+            ])
+            .lean();
 
         const updateQuery: UpdateQuery<EmailSendRecordDocument> = { status: EmailSendRecordStatus.Failed };
         if (!emailPlatforms.length) updateQuery.failureReason = '沒有可用的平台';
