@@ -1,4 +1,4 @@
-import type { EmailSendRecordDocument } from '@kiki-core-stack/pack/models/email/send-record';
+import type { EmailSendRecord } from '@kiki-core-stack/pack/models/email/send-record';
 import type { EmailPlatformConfigs } from '@kiki-core-stack/pack/types/email';
 import { createTransport } from 'nodemailer';
 import type { Transporter } from 'nodemailer';
@@ -26,7 +26,7 @@ export class EmailSmtpServiceProvider extends BaseEmailServiceProvider {
         });
     }
 
-    async sendEmail(emailSendRecord: EmailSendRecordDocument) {
+    async sendEmail(emailSendRecord: EmailSendRecord) {
         const sendResult = await this.#transport.sendMail({
             bcc: emailSendRecord.to,
             from: emailSendRecord.from,
