@@ -4,8 +4,10 @@ import { redisClient } from '@kiki-core-stack/pack/constants/redis';
 import { mongooseConnections } from '@kikiutils/mongoose/constants';
 import { logger } from '@kikiutils/shared/consola';
 
-import { emailSendJobRestorer } from '@/job-restorers';
-import { emailSendJobWorkerManager } from '@/worker-managers';
+import {
+    emailSendJobRestorer,
+    emailSendJobWorkerManager,
+} from '@/email';
 
 let isGracefulExitStarted = false;
 

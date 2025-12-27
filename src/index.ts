@@ -1,6 +1,8 @@
+import {
+    emailSendJobRestorer,
+    emailSendJobWorkerManager,
+} from '@/email';
 import { gracefulExit } from '@/graceful-exit';
-import { emailSendJobRestorer } from '@/job-restorers';
-import { emailSendJobWorkerManager } from '@/worker-managers';
 
 // Register exit signals
 process.on('SIGINT', () => gracefulExit());
