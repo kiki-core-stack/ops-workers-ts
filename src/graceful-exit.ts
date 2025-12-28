@@ -20,8 +20,8 @@ export async function gracefulExit(server?: Server<any>) {
     // Perform operations such as closing the database connection here.
 
     // Email
-    await emailSendJobWorkerManager.stop();
     await emailSendJobRestorer.stop();
+    await emailSendJobWorkerManager.stop();
 
     redisClient.close();
     await mongooseConnections.default?.close();
