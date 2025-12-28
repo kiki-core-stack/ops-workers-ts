@@ -9,5 +9,5 @@ process.on('SIGINT', () => gracefulExit());
 process.on('SIGTERM', () => gracefulExit());
 
 // Email
-await emailSendJobWorkerManager.start();
 await emailSendJobRestorer.start();
+await emailSendJobWorkerManager.start();
