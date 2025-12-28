@@ -8,8 +8,6 @@ import { gracefulExit } from '@/graceful-exit';
 process.on('SIGINT', () => gracefulExit());
 process.on('SIGTERM', () => gracefulExit());
 
-// Run job restorers
+// Email
 await emailSendJobRestorer.start();
-
-// Run worker managers
 await emailSendJobWorkerManager.start();

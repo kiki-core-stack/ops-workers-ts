@@ -19,10 +19,8 @@ export async function gracefulExit(server?: Server<any>) {
 
     // Perform operations such as closing the database connection here.
 
-    // Stop worker managers
+    // Email
     await emailSendJobWorkerManager.stop();
-
-    // Stop job restorers
     await emailSendJobRestorer.stop();
 
     redisClient.close();
