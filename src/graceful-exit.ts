@@ -18,11 +18,15 @@ export async function gracefulExit(server?: Server<any>) {
     await server?.stop();
 
     // Perform operations such as closing the database connection here.
+    const promises = [];
 
     // Email
-    await emailSendJobRestorer.stop();
-    await emailSendJobWorkerManager.stop();
+    promises.push(
+        emailSendJobRestorer.stop(),
+        emailSendJobWorkerManager.stop(),
+    );
 
+    await Promise.all(promises);
     redisClient.close();
     await mongooseConnections.default?.close();
 

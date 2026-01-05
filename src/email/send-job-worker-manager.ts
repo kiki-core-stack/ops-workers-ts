@@ -75,7 +75,7 @@ export class EmailSendJobWorkerManager extends BaseServiceLifecycle {
                 await this.#processJob(emailSendRecordId);
             } catch (error) {
                 if (!(error as Error).message.includes('Connection closed')) {
-                    this.logger.error(this.loggerPrefix, error);
+                    this.logger.error(error);
                 }
 
                 if (emailSendRecordId) await globalRedisClient.lpush('email:send:queue', emailSendRecordId);
