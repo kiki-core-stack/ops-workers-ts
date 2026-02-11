@@ -30,7 +30,7 @@ export class EmailSendJobWorkerManager extends BaseServiceLifecycle {
                 status: EmailSendRecordStatus.Pending,
             },
             { status: EmailSendRecordStatus.Processing },
-            { new: true },
+            { returnDocument: 'after' },
         );
 
         if (!emailSendRecord) return;
