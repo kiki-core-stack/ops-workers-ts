@@ -72,7 +72,7 @@ build:
 # stage: release
 # release:
 #   stage: release
-#   image: node:24-alpine
+#   image: node:26-alpine
 
 #   only:
 #     - main
