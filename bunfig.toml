@@ -1,8 +1,6 @@
 [install]
 minimumReleaseAge = 86400
-minimumReleaseAgeExcludes = [
-]
-
+minimumReleaseAgeExcludes = [ "@kiki-core-stack/pack" ]
 ignoreScripts = true
 linker = "isolated"
 saveTextLockfile = true
