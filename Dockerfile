@@ -13,7 +13,7 @@ RUN apt-get update && \
     apt-get upgrade -y
 
 ## Copy package-related files and install dependencies
-COPY ./bun.lock ./package.json ./
+COPY ./bun.lock ./bunfig.toml ./package.json ./
 RUN --mount=id=bun-cache,target=/root/.bun/install/cache,type=cache \
     bun i --frozen-lockfile
 
@@ -34,6 +34,7 @@ ENV NODE_ENV='production' \
 WORKDIR /app
 
 ## Setups
+COPY ./bunfig.toml ./
 RUN \
     ### Upgrade and install packages
     apt-get update && \

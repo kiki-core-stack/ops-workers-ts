@@ -1,0 +1,9 @@
+[install]
+minimumReleaseAge = 86400
+minimumReleaseAgeExcludes = [
+]
+
+ignoreScripts = true
+linker = "isolated"
+saveTextLockfile = true
+telemetry = false
