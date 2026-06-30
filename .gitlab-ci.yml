@@ -1,91 +1,219 @@
+# Includes
+#
+# include:
+#   - local: .gitlab/ci/*.yml
+#   - project: group/project
+#     file: path/to/template.yml
+#     ref: main
+
+# Stages
+
 stages:
   - check
   # - release
 
-# Anchors
+# Defaults
+
+default:
+  interruptible: true
+
+  # retry:
+  #   max: 1
+  #   when:
+  #     - runner_system_failure
+  #     - stuck_or_timeout_failure
+  # timeout: 30m
+
+# Variables
+
+variables:
+  # Git checkout behavior.
+  # Set GIT_DEPTH to '0' for release jobs that need full tag/history access.
+  GIT_DEPTH: '0'
+  GIT_SUBMODULE_STRATEGY: none
+
+  # GitLab cache archive tuning.
+  # GitLab CI cache still creates an archive; these settings reduce compression overhead.
+  CACHE_COMPRESSION_FORMAT: tarzstd
+  CACHE_COMPRESSION_LEVEL: fastest
+
+  # Default: GitLab CI cache archive paths inside the project directory.
+  # Works on shared/self-hosted runners without runner config changes.
+  BUN_CACHE_DIR: .cache/bun/install/cache
+  NPM_CONFIG_CACHE: .cache/npm
+  PNPM_STORE_DIR: .cache/pnpm/store
+
+  # Alternative: local Docker volume cache, no GitLab cache archive/compression.
+  # Requires runner config.toml volumes, for example:
+  #   [runners.docker]
+  #     volumes = [
+  #       "gitlab-runner-builds:/builds",
+  #       "gitlab-runner-cache:/cache",
+  #       "bun-install-cache:/bun-cache",
+  #       "npm-cache:/npm-cache",
+  #       "pnpm-cache:/pnpm-cache",
+  #     ]
+  # Then uncomment these paths and remove/disable the job `cache:` blocks below.
+  # BUN_CACHE_DIR: /bun-cache/${CI_PROJECT_PATH_SLUG}
+  # NPM_CONFIG_CACHE: /npm-cache/${CI_PROJECT_PATH_SLUG}
+  # PNPM_STORE_DIR: /pnpm-cache/${CI_PROJECT_PATH_SLUG}/store
+
+  # npm / semantic-release install hardening.
+  NPM_CONFIG_IGNORE_SCRIPTS: 'true'
+  NPM_CONFIG_MIN_RELEASE_AGE: '1'
+
+# Rules
+
+.main-branch-rules: &main-branch-rules
+  - if: $CI_COMMIT_BRANCH == "main"
+    when: on_success
+  - when: never
+
+.mr-to-dev-or-main-rules: &mr-to-dev-or-main-rules
+  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
+    when: always
+  - when: never
+
+# Caches
 
 .bun-cache: &bun-cache
-  cache:
-    key: bun-cache
-    paths:
-      - ./.cache/bun/install/cache
+  key:
+    files:
+      - bun.lock
+      - bun.lockb
+
+  paths:
+    - .cache/bun/install/cache
+
+  policy: pull-push
+
+.npm-cache: &npm-cache
+  key: npm-cache
+
+  paths:
+    - .cache/npm
+
+  policy: pull-push
+
+.pnpm-cache: &pnpm-cache
+  key:
+    files:
+      - pnpm-lock.yaml
+
+  paths:
+    - .cache/pnpm/store
+
+  policy: pull-push
+
+# Scripts
 
 .setup-bun-and-install-dependencies: &setup-bun-and-install-dependencies
   - |
-    echo '[install.cache]' >~/.bunfig.toml
-    echo 'dir = "./.cache/bun/install/cache"' >>~/.bunfig.toml
-  - bun i --frozen-lockfile
+    mkdir -p "${BUN_CACHE_DIR}"
+    printf '[install.cache]\ndir = "%s"\n' "${BUN_CACHE_DIR}" > ~/.bunfig.toml
 
-# Jobs
+  - bun install --frozen-lockfile
 
-# stage: check
-lint:
+.setup-pnpm-and-install-dependencies: &setup-pnpm-and-install-dependencies
+  - npm install --global pnpm@latest
+  - pnpm config set store-dir "${PNPM_STORE_DIR}"
+  - pnpm install --frozen-lockfile
+
+# Job templates
+
+.bun-check-job:
   stage: check
   image: oven/bun:alpine
 
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
-      when: always
-    - when: never
+  rules: *mr-to-dev-or-main-rules
 
-  <<: *bun-cache
+  cache: *bun-cache
 
   before_script: *setup-bun-and-install-dependencies
+
+# Optional pnpm check template. Switch check jobs to this template if the project uses pnpm.
+# .pnpm-check-job: &pnpm-check-job
+#   stage: check
+#   image: node:26-alpine
+#
+#   rules: *mr-to-dev-or-main-rules
+#
+#   cache: *pnpm-cache
+#
+#   before_script: *setup-pnpm-and-install-dependencies
+
+# Jobs: check
+
+lint:
+  extends: .bun-check-job
 
   script:
     - bun run lint
 
-# stage: check
 typecheck:
-  stage: check
-  image: oven/bun:alpine
-
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
-      when: always
-    - when: never
-
-  <<: *bun-cache
-
-  before_script: *setup-bun-and-install-dependencies
+  extends: .bun-check-job
 
   script:
     - bun run typecheck
 
-# stage: check
 build:
-  stage: check
-  image: oven/bun:alpine
-
-  rules:
-    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
-      when: always
-    - when: never
-
-  <<: *bun-cache
-
-  before_script: *setup-bun-and-install-dependencies
+  extends: .bun-check-job
 
   script:
     - bun run build
 
-# stage: release
+# Jobs: release
+#
+# Release job template.
+# To enable:
+#   1. Uncomment `release` in `stages`.
+#   2. Uncomment this job.
+#   3. Ensure semantic-release config and GitLab token variables are configured.
+#
 # release:
 #   stage: release
 #   image: node:26-alpine
-
-#   only:
-#     - main
-
+#
+#   rules: *main-branch-rules
+#
+#   variables:
+#     GIT_DEPTH: '0'
+#
+#   cache: *npm-cache
+#
 #   before_script:
-#     - apk update && apk upgrade && apk add git
+#     - apk add --no-cache git
 #     - |
-#       npm i -g \
-#         semantic-release@latest \
+#       npm install --global \
+#         --ignore-scripts=true \
+#         --min-release-age=1 \
+#         semantic-release@^25 \
 #         @semantic-release/changelog@latest \
 #         @semantic-release/git@latest \
 #         @semantic-release/gitlab@latest \
-#         conventional-changelog-conventionalcommits@latest
-
+#         conventional-changelog-conventionalcommits@^9
+#
 #   script:
 #     - semantic-release
+#
+# Local Docker volume cache variant for release:
+# If using NPM_CONFIG_CACHE=/npm-cache/${CI_PROJECT_PATH_SLUG}, remove/comment the release job `cache:` line above.
+#
+# Local Docker volume cache variant for check jobs:
+# If using BUN_CACHE_DIR=/bun-cache/${CI_PROJECT_PATH_SLUG}, remove/comment `cache: *bun-cache` from `.bun-check-job`.
+# If using PNPM_STORE_DIR=/pnpm-cache/${CI_PROJECT_PATH_SLUG}/store, remove/comment `cache: *pnpm-cache` from `.pnpm-check-job`.
+
+# Jobs: deploy
+#
+# deploy:
+#   stage: deploy
+#   image: alpine:latest
+#
+#   rules: *main-branch-rules
+#
+#   environment:
+#     name: production
+#     url: https://example.com
+#
+#   script:
+#     - echo "deploy"
