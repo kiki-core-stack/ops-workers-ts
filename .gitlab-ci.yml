@@ -28,8 +28,8 @@ default:
 
 variables:
   # Git checkout behavior.
-  # Set GIT_DEPTH to '0' for release jobs that need full tag/history access.
-  GIT_DEPTH: '0'
+  # Keep check pipelines shallow; release jobs override this to '0' for full tag/history access.
+  GIT_DEPTH: '20'
   GIT_SUBMODULE_STRATEGY: none
 
   # GitLab cache archive tuning.
