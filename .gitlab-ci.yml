@@ -107,14 +107,16 @@ variables:
 
 # Scripts
 
-.setup-bun-and-install-dependencies: &setup-bun-and-install-dependencies
-  - |
-    mkdir -p "${BUN_CACHE_DIR}"
-    printf '[install.cache]\ndir = "%s"\n' "${BUN_CACHE_DIR}" > ~/.bunfig.toml
+.setup-bun-cache-config: &setup-bun-cache-config |
+  mkdir -p "${BUN_CACHE_DIR}"
+  printf '[install.cache]\ndir = "%s"\n' "${BUN_CACHE_DIR}" > ~/.bunfig.toml
 
+.setup-bun-and-install-dependencies: &setup-bun-and-install-dependencies
+  - *setup-bun-cache-config
   - bun install --frozen-lockfile
 
 .setup-pnpm-and-install-dependencies: &setup-pnpm-and-install-dependencies
+  - *setup-bun-cache-config
   - npm install --global pnpm@latest
   - pnpm config set store-dir "${PNPM_STORE_DIR}"
   - pnpm install --frozen-lockfile
