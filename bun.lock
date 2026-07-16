@@ -4,7 +4,7 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "@kiki-core-stack/pack": "latest",
+        "@kiki-core-stack/pack": "git+https://github.com/kiki-core-stack/pack#db924fd625ee673beeb6a0b1e93c2b37f4f188f4",
         "@kikiutils/mongoose": "latest",
         "@kikiutils/shared": "latest",
         "consola": "latest",
@@ -95,7 +95,7 @@
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
-    "@kiki-core-stack/pack": ["@kiki-core-stack/pack@0.95.4", "", { "peerDependencies": { "@hono/zod-validator": "^0.8.0", "@kikiutils/mongoose": "^7.0.2", "@kikiutils/shared": "^16.0.0", "consola": "^3.4.2", "es-toolkit": "^1.47.0", "file-type": "^22.0.1", "hono": "^4.12.28", "lru-cache": "^11.5.2", "mongoose": "^9.7.4", "nanoid": "^6.0.0", "sharp": "^0.35.3", "type-fest": "^5.8.0", "ws.io-client": "^0.3.10", "zod": "^4.4.3" }, "optionalPeers": ["@hono/zod-validator", "@kikiutils/mongoose", "@kikiutils/shared", "consola", "es-toolkit", "file-type", "hono", "lru-cache", "mongoose", "nanoid", "sharp", "type-fest", "ws.io-client", "zod"] }, "sha512-fMwCae8RBIRFpZdsvAh4Bu/GMCDJvTAajGhBuwy2JeoDgxOVAuQmeTbTC79GC/2RGjOtx61hNFvJ5/Y5lLRnzw=="],
+    "@kiki-core-stack/pack": ["@kiki-core-stack/pack@github:kiki-core-stack/pack#db924fd", { "peerDependencies": { "@hono/zod-validator": "^0.9.0", "@kikiutils/mongoose": "^7.0.2", "@kikiutils/shared": "^16.0.0", "consola": "^3.4.2", "es-toolkit": "^1.47.0", "file-type": "^22.0.1", "hono": "^4.12.28", "lru-cache": "^11.5.2", "mongoose": "^9.7.4", "nanoid": "^6.0.0", "sharp": "^0.35.3", "type-fest": "^5.8.0", "ws.io-client": "^0.3.10", "zod": "^4.4.3" }, "optionalPeers": ["@hono/zod-validator", "@kikiutils/mongoose", "@kikiutils/shared", "consola", "es-toolkit", "file-type", "hono", "lru-cache", "mongoose", "nanoid", "sharp", "type-fest", "ws.io-client", "zod"] }, "kiki-core-stack-pack-db924fd", "sha512-jp9/TY+BIqE4P01Cks8u1fQM7pVdxrBK0L+le25/yqvLY78//+xli4xrMbRjG/CHpnWBUmcClxPDVJfNZd/2Ig=="],
 
     "@kikiutils/eslint-config": ["@kikiutils/eslint-config@9.2.0", "", { "dependencies": { "eslint-plugin-promise": "^7.3.0" }, "peerDependencies": { "@antfu/eslint-config": "^9.0.0", "@eslint/css": "^1.1.0", "@html-eslint/parser": ">=0.61.0", "@kikiutils/eslint-plugin-vue": "^10.10.0", "eslint": ">=9.0.0", "eslint-plugin-better-tailwindcss": "^4.4.0", "eslint-plugin-format": ">=1.0.0", "tailwind-csstree": "^0.3.1", "tailwindcss": ">=4.0.0", "vue-eslint-parser": "^10.4.0" }, "optionalPeers": ["@eslint/css", "@html-eslint/parser", "@kikiutils/eslint-plugin-vue", "eslint", "eslint-plugin-better-tailwindcss", "eslint-plugin-format", "tailwind-csstree", "tailwindcss", "vue-eslint-parser"] }, "sha512-w5SRDhTXSUFncPvfNj0vL2ATMN0qcTNSmSYJndtAaGacyfsyFGWSRnm/e3QOG70GOjcdF6coWEW4IgKPqjVV2w=="],
 
@@ -333,7 +333,7 @@
 
     "diff-sequences": ["diff-sequences@29.6.3", "", {}, "sha512-EjePK1srD3P08o2j4f0ExnylqRs5B9tJjcp9t1krH2qRi8CCdsYfwe9JgSLurFBWwq4uOlipzfk5fHNvwFKr8Q=="],
 
-    "electron-to-chromium": ["electron-to-chromium@1.5.389", "", {}, "sha512-cEto7aeOqBfU1D+c5py5pE+ooscKE75JifxLBdFUZsqAxRS6y7kebtxAZvICszSl05gPjYHDTjY+lXpyGvpJbg=="],
+    "electron-to-chromium": ["electron-to-chromium@1.5.391", "", {}, "sha512-YmCu4856jkgKT1Nh6fwRdeVrM6Ydf/fBnq51tpmSfX+jOcUMTxh31yH6hjKScRenhB2oDSvA9oooxcpjogPeig=="],
 
     "empathic": ["empathic@2.0.1", "", {}, "sha512-YGRs8knHhKHVShLkFET/rWAU8kmHbOV5LwN938RHI0pljAJ1Gf6SzXsSmRaEzcXTtOOmVqJ5+WtQPL5uigY50Q=="],
 
@@ -757,7 +757,7 @@
 
     "ufo": ["ufo@1.6.4", "", {}, "sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA=="],
 
-    "unbash": ["unbash@4.0.2", "", {}, "sha512-8gwNZ29+0/3zmXw7ToIHZtg6wK37xnniRUdBt7B27xZxaxfgR5tGMaGHT0t0dLtBV9fXE7zurh0s6Z1DHVjfWg=="],
+    "unbash": ["unbash@4.0.3", "", {}, "sha512-3cudTErfToSc4Ggv8XGXVNVli/xHKUtUZvaY5UVwhOcUPbQGz7PeaEnT/SAVgNziZtX67KEN9swMUYkLghxA1w=="],
 
     "undici-types": ["undici-types@8.3.0", "", {}, "sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ=="],
 

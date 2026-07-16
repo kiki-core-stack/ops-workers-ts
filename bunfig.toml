@@ -1,4 +1,4 @@
 [install]
 minimumReleaseAge = 86400
-minimumReleaseAgeExcludes = [ "@kiki-core-stack/pack" ]
+minimumReleaseAgeExcludes = []
 telemetry = false
