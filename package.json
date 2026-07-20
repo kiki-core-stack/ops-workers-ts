@@ -13,7 +13,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@kiki-core-stack/pack": "git+https://github.com/kiki-core-stack/pack#db924fd625ee673beeb6a0b1e93c2b37f4f188f4",
+    "@kiki-core-stack/pack": "git+https://github.com/kiki-core-stack/pack#5abbe5392faead7917f995f18e2449e74890914d",
     "@kikiutils/mongoose": "^7.0.2",
     "@kikiutils/shared": "^16.0.0",
     "consola": "^3.4.2",
@@ -30,7 +30,7 @@
     "@types/nodemailer": "^8.0.1",
     "cross-env": "^10.1.0",
     "eslint": "^10.7.0",
-    "knip": "^6.26.0",
+    "knip": "^6.27.0",
     "rimraf": "^6.1.3",
     "type-fest": "^5.8.0",
     "typescript": "^6.0.3"
