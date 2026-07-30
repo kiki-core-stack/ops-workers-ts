@@ -160,6 +160,23 @@ v8-compile-cache*/
 
 ### Other ###
 
+# Development-only AI tooling and generated analysis files
+.agents/
+.aider*
+.claude/
+.cline/
+.codegraph/
+.codex/
+.cursor/
+.gemini/
+.junie/
+.omx/
+.roo/
+.serena/
+.windsurf/
+CLAUDE.local.md
+repomix-output.*
+
 # Docker
 .dockerignore
 docker-build.sh
