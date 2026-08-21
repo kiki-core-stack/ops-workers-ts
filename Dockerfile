@@ -50,13 +50,12 @@ RUN \
     ### Add user
     useradd -mr -g nogroup -s /usr/sbin/nologin -u 10001 user
 
-## Copy files and libraries
-COPY --from=build-stage /app/dist ./
-COPY ./.env.production.local ./.env
-
 ## Copy and set the entrypoint script
-COPY --chmod=700 ./docker-entrypoint.sh ./
-RUN chown -R 10001:nogroup /app
+COPY --chmod=700 --chown=10001:nogroup ./docker-entrypoint.sh ./
 USER 10001
 ENTRYPOINT ["tini", "--"]
 CMD ["./docker-entrypoint.sh"]
+
+## Copy files and libraries
+COPY --chown=10001:nogroup --from=build-stage /app/dist ./
+COPY --chown=10001:nogroup ./.env.production.local ./.env
