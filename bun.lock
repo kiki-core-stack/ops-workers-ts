@@ -4,7 +4,7 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "@kiki-core-stack/pack": "git+https://github.com/kiki-core-stack/pack#083a052b00c58925f1d35f13ed60003785d88955",
+        "@kiki-core-stack/pack": "git+https://github.com/kiki-core-stack/pack#8fcc9c5a89c031767e41b2dbece7c6202c2dee09",
         "@kikiutils/mongoose": "^7.0.3",
         "@kikiutils/shared": "^18.0.1",
         "consola": "^3.4.2",
@@ -92,7 +92,7 @@
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.5.5", "", {}, "sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og=="],
 
-    "@kiki-core-stack/pack": ["@kiki-core-stack/pack@github:kiki-core-stack/pack#083a052", { "peerDependencies": { "@hono/zod-validator": "^0.9.0", "@kikiutils/mongoose": "^7.0.2", "@kikiutils/shared": "^16.0.0", "consola": "^3.4.2", "es-toolkit": "^1.47.0", "file-type": "^22.0.1", "hono": "^4.12.28", "lru-cache": "^11.5.2", "mongoose": "^9.7.4", "nanoid": "^6.0.0", "sharp": "^0.35.3", "type-fest": "^5.8.0", "ws.io-client": "^0.3.10", "zod": "^4.4.3" }, "optionalPeers": ["@hono/zod-validator", "@kikiutils/mongoose", "@kikiutils/shared", "consola", "es-toolkit", "file-type", "hono", "lru-cache", "mongoose", "nanoid", "sharp", "type-fest", "ws.io-client", "zod"] }, "kiki-core-stack-pack-083a052", "sha512-FYzD95bC1q7xPITA5s3FCP3wkzDdtdktCDGyEZFoIOcKZGb5FqDNeVzuiv8wQF8yyLWT7n2ESiqSbuUcvmUb7w=="],
+    "@kiki-core-stack/pack": ["@kiki-core-stack/pack@github:kiki-core-stack/pack#8fcc9c5", { "peerDependencies": { "@hono/zod-validator": "^0.9.0", "@kikiutils/mongoose": "^7.0.2", "@kikiutils/shared": "^16.0.0", "consola": "^3.4.2", "es-toolkit": "^1.47.0", "file-type": "^22.0.1", "hono": "^4.12.28", "lru-cache": "^11.5.2", "mongoose": "^9.7.4", "nanoid": "^6.0.0", "sharp": "^0.35.3", "type-fest": "^5.8.0", "ws.io-client": "^0.3.10", "zod": "^4.4.3" }, "optionalPeers": ["@hono/zod-validator", "@kikiutils/mongoose", "@kikiutils/shared", "consola", "es-toolkit", "file-type", "hono", "lru-cache", "mongoose", "nanoid", "sharp", "type-fest", "ws.io-client", "zod"] }, "kiki-core-stack-pack-8fcc9c5", "sha512-F5MUjsSy3q7417irCMFy/VrQKNYDhq7eEYwZRDNl4GWu3AwK2H0+y+nJkYqUqYxiyYh1tIxAgOd3dzzF6ys4XQ=="],
 
     "@kikiutils/eslint-config": ["@kikiutils/eslint-config@9.2.0", "", { "dependencies": { "eslint-plugin-promise": "^7.3.0" }, "peerDependencies": { "@antfu/eslint-config": "^9.0.0", "@eslint/css": "^1.1.0", "@html-eslint/parser": ">=0.61.0", "@kikiutils/eslint-plugin-vue": "^10.10.0", "eslint": ">=9.0.0", "eslint-plugin-better-tailwindcss": "^4.4.0", "eslint-plugin-format": ">=1.0.0", "tailwind-csstree": "^0.3.1", "tailwindcss": ">=4.0.0", "vue-eslint-parser": "^10.4.0" }, "optionalPeers": ["@eslint/css", "@html-eslint/parser", "@kikiutils/eslint-plugin-vue", "eslint", "eslint-plugin-better-tailwindcss", "eslint-plugin-format", "tailwind-csstree", "tailwindcss", "vue-eslint-parser"] }, "sha512-w5SRDhTXSUFncPvfNj0vL2ATMN0qcTNSmSYJndtAaGacyfsyFGWSRnm/e3QOG70GOjcdF6coWEW4IgKPqjVV2w=="],
 
