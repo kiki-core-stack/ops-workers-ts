@@ -1,25 +1,29 @@
 # Build stage
 FROM oven/bun:slim AS build-stage
 
-## Set args, envs and workdir
+## Upgrade system packages
+RUN apt-get update && \
+    apt-get upgrade -y
+
+## Configure build-time options and the environment
 ARG NPM_CONFIG_REGISTRY
 ENV NODE_ENV='production' \
     NPM_CONFIG_REGISTRY="${NPM_CONFIG_REGISTRY}"
 
 WORKDIR /app
 
-## Upgrade packages
-RUN apt-get update && \
-    apt-get upgrade -y
-
-## Copy package-related files and install dependencies
+## Copy dependency manifests and package manager configuration
 COPY ./bun.lock ./bunfig.toml ./package.json ./
+
+## Install dependencies
 RUN --mount=id=bun-cache,target=/root/.bun/install/cache,type=cache \
     bun i --frozen-lockfile
 
-## Copy source files and build-related files, then build the app
+## Copy application sources and build configuration
 COPY ./.env.production.local ./.gitignore ./eslint.config.mjs ./tsconfig.json ./
 COPY ./src ./src
+
+## Validate and build the application
 RUN bun run lint && \
     bun run typecheck && \
     bun run build
@@ -27,35 +31,41 @@ RUN bun run lint && \
 # Runtime stage
 FROM oven/bun:slim
 
-## Set envs and workdir
-ENV NODE_ENV='production' \
-    TZ='UTC'
-
+## Configure the runtime environment and working directory
+ENV TZ='UTC'
 WORKDIR /app
 
-## Setups
-COPY ./bunfig.toml ./
+## Install runtime packages and configure the runtime user
 RUN \
-    ### Upgrade and install packages
+    ### Upgrade system packages and install runtime dependencies
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends tini tzdata && \
-    ### Set timezone
+    apt-get install -y --no-install-recommends ca-certificates tini tzdata && \
+    ### Configure the timezone
     ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
     echo "${TZ}" >/etc/timezone && \
-    ### Cleanup
+    ### Clean package manager metadata
     apt-get autoremove -y --purge && \
     apt-get clean && \
     rm -rf /var/cache/apt/* /var/lib/apt/lists/* && \
-    ### Add user
-    useradd -mr -g nogroup -s /usr/sbin/nologin -u 10001 user
+    ### Create the runtime user and set application ownership
+    useradd -mr -g nogroup -s /usr/sbin/nologin -u 10001 user && \
+    chown 10001:nogroup /app -R
 
-## Copy and set the entrypoint script
+## Copy and configure the entrypoint
 COPY --chmod=700 --chown=10001:nogroup ./docker-entrypoint.sh ./
 USER 10001
 ENTRYPOINT ["tini", "--"]
 CMD ["./docker-entrypoint.sh"]
 
-## Copy files and libraries
+## Configure remaining runtime defaults
+ENV NODE_ENV='production'
+
+## Optionally install runtime packages that provide required executables
+# Replace the placeholder package with the required package name(s) before uncommenting.
+# COPY ./bunfig.toml ./
+# RUN bun add example-package
+
+## Copy the application output and runtime configuration
 COPY --chown=10001:nogroup --from=build-stage /app/dist ./
 COPY --chown=10001:nogroup ./.env.production.local ./.env
