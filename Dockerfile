@@ -12,10 +12,8 @@ ENV NODE_ENV='production' \
 
 WORKDIR /app
 
-## Copy dependency manifests and package manager configuration
+## Copy dependency manifests, manager configuration and install dependencies
 COPY ./bun.lock ./bunfig.toml ./package.json ./
-
-## Install dependencies
 RUN --mount=id=bun-cache,target=/root/.bun/install/cache,type=cache \
     bun i --frozen-lockfile
 
