@@ -62,7 +62,8 @@ ENV NODE_ENV='production'
 ## Optionally install runtime packages that provide required executables
 # Replace the placeholder package with the required package name(s) before uncommenting.
 # COPY ./bunfig.toml ./
-# RUN bun add example-package
+# RUN bun add example-package && \
+#     rm -rf /root/.bun/install
 
 ## Copy the application output and runtime configuration
 COPY --chown=10001:nogroup --from=build-stage /app/dist ./
