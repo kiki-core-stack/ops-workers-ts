@@ -1,15 +1,15 @@
 import type { EmailSendRecord } from '@kiki-core-stack/pack/models/email/send-record';
-import type { EmailPlatformConfigs } from '@kiki-core-stack/pack/types/email';
+import type { EmailProviderConfigs } from '@kiki-core-stack/pack/types/email';
 import { createTransport } from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import { BaseEmailServiceProvider } from './base';
+import { BaseEmailProvider } from './base';
 
-export class EmailSmtpServiceProvider extends BaseEmailServiceProvider {
+export class EmailSmtpProvider extends BaseEmailProvider {
     readonly #transport: Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options>;
 
-    constructor(config: EmailPlatformConfigs.Smtp) {
+    constructor(config: EmailProviderConfigs.Smtp) {
         super();
         this.#transport = createTransport({
             auth: config.username && config.password

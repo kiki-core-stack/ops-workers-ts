@@ -2,7 +2,7 @@ import type { RedisClient } from 'bun';
 
 import { EmailSendRecordStatus } from '@kiki-core-stack/pack/constants/email';
 import { redisClient as globalRedisClient } from '@kiki-core-stack/pack/constants/redis';
-import { EmailPlatformModel } from '@kiki-core-stack/pack/models/email/platform';
+import { EmailProviderModel } from '@kiki-core-stack/pack/models/email/provider';
 import { EmailSendRecordModel } from '@kiki-core-stack/pack/models/email/send-record';
 import type { EmailSendRecordDocument } from '@kiki-core-stack/pack/models/email/send-record';
 import { Types } from 'mongoose';
@@ -10,7 +10,7 @@ import type { UpdateQuery } from 'mongoose';
 
 import { BaseServiceLifecycle } from '@/base-service-lifecycle';
 
-import { createEmailServiceProviderInstance } from './service-providers';
+import { createEmailProviderInstance } from './providers';
 
 export class EmailSendJobWorkerManager extends BaseServiceLifecycle {
     // Private properties
@@ -35,25 +35,25 @@ export class EmailSendJobWorkerManager extends BaseServiceLifecycle {
 
         if (!emailSendRecord) return;
 
-        const emailPlatforms = await EmailPlatformModel
+        const emailProviders = await EmailProviderModel
             .find({ enabled: true })
             .sort({ priority: -1 })
             .select([
                 'config',
-                'configMd5',
-                'serviceProvider',
+                'configHash',
+                'providerCode',
             ])
             .lean();
 
         const updateQuery: UpdateQuery<EmailSendRecordDocument> = { status: EmailSendRecordStatus.Failed };
-        if (!emailPlatforms.length) updateQuery.failureReason = '沒有可用的平台';
+        if (!emailProviders.length) updateQuery.failureReason = '沒有可用的服務商';
         else {
-            for (const emailPlatform of emailPlatforms) {
+            for (const emailProvider of emailProviders) {
                 try {
-                    const emailServiceProviderInstance = createEmailServiceProviderInstance(emailPlatform);
-                    updateQuery.platform = emailPlatform;
-                    const sendResult = await emailServiceProviderInstance.sendEmail(emailSendRecord);
-                    updateQuery.serviceProviderTransactionId = sendResult.transactionId;
+                    const emailProviderInstance = createEmailProviderInstance(emailProvider);
+                    updateQuery.provider = emailProvider;
+                    const sendResult = await emailProviderInstance.sendEmail(emailSendRecord);
+                    updateQuery.providerTransactionId = sendResult.transactionId;
                     updateQuery.status = EmailSendRecordStatus.Success;
                     break;
                 } catch (error) {
