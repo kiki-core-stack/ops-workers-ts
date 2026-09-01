@@ -1,5 +1,5 @@
-import { EmailProviderCode } from '@kiki-core-stack/pack/constants/email';
-import type { EmailProvider } from '@kiki-core-stack/pack/models/email/provider';
+import { EmailProviderCode } from '@kcs-project/pack/constants/email';
+import type { EmailProvider } from '@kcs-project/pack/models/email/provider';
 
 import type { BaseEmailProvider } from './base';
 import { EmailSmtpProvider } from './smtp';

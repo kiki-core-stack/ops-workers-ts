@@ -1,5 +1,5 @@
-import type { EmailSendRecord } from '@kiki-core-stack/pack/models/email/send-record';
-import type { EmailProviderConfigs } from '@kiki-core-stack/pack/types/email';
+import type { EmailSendRecord } from '@kcs-project/pack/models/email/send-record';
+import type { EmailProviderConfigs } from '@kcs-project/pack/types/email';
 import { createTransport } from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';

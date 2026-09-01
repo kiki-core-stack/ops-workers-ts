@@ -1,7 +1,7 @@
-import { EmailSendRecordStatus } from '@kiki-core-stack/pack/constants/email';
-import { redisClient } from '@kiki-core-stack/pack/constants/redis';
-import { enqueueEmailSendRecordIds } from '@kiki-core-stack/pack/libs/email';
-import { EmailSendRecordModel } from '@kiki-core-stack/pack/models/email/send-record';
+import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
+import { redisClient } from '@kcs-project/pack/constants/redis';
+import { enqueueEmailSendRecordIds } from '@kcs-project/pack/libs/email';
+import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
 import { delay } from '@kikiutils/shared/time';
 import {
     subMinutes,

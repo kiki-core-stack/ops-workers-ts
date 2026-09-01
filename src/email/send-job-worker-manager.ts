@@ -1,10 +1,10 @@
 import type { RedisClient } from 'bun';
 
-import { EmailSendRecordStatus } from '@kiki-core-stack/pack/constants/email';
-import { redisClient as globalRedisClient } from '@kiki-core-stack/pack/constants/redis';
-import { EmailProviderModel } from '@kiki-core-stack/pack/models/email/provider';
-import { EmailSendRecordModel } from '@kiki-core-stack/pack/models/email/send-record';
-import type { EmailSendRecordDocument } from '@kiki-core-stack/pack/models/email/send-record';
+import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
+import { redisClient as globalRedisClient } from '@kcs-project/pack/constants/redis';
+import { EmailProviderModel } from '@kcs-project/pack/models/email/provider';
+import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
+import type { EmailSendRecordDocument } from '@kcs-project/pack/models/email/send-record';
 import { Types } from 'mongoose';
 import type { UpdateQuery } from 'mongoose';
 
