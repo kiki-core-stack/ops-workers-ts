@@ -1,13 +1,13 @@
 import type { EmailSendRecord } from '@kcs-project/pack/models/email/send-record';
 import type { EmailProviderConfigs } from '@kcs-project/pack/types/email';
 import { createTransport } from 'nodemailer';
-import type { Transporter } from 'nodemailer';
+import type { Mail } from 'nodemailer';
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 import { BaseEmailProvider } from './base';
 
 export class EmailSmtpProvider extends BaseEmailProvider {
-    readonly #transport: Transporter<SMTPTransport.SentMessageInfo, SMTPTransport.Options>;
+    readonly #transport: Mail<SMTPTransport.SMTPSentMessageInfo>;
 
     constructor(config: EmailProviderConfigs.Smtp) {
         super();
