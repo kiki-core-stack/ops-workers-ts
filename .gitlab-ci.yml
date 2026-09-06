@@ -1,4 +1,7 @@
-# Includes
+# CI includes
+#
+# Use local or project-level includes when this pipeline is composed from
+# additional configuration files.
 #
 # include:
 #   - local: .gitlab/ci/*.yml
@@ -8,8 +11,8 @@
 
 # Stages
 #
-# Keep `release` commented unless this repository has a semantic-release
-# configuration and the required GitLab release variables.
+# Declare the stages used by this pipeline and keep their order aligned with
+# the execution flow.
 
 stages:
   - check
@@ -17,7 +20,7 @@ stages:
 
 # Defaults
 
-# Shared defaults apply to every non-hidden job unless the job overrides them.
+# Default settings apply to every non-hidden job unless a job overrides them.
 default:
   interruptible: true
 
@@ -32,8 +35,8 @@ default:
 
 variables:
   # Git checkout behavior.
-  # Check jobs use a shallow checkout; the release job overrides this to `0`
-  # so semantic-release can inspect the complete tag and commit history.
+  # Keep check jobs shallow; release jobs can override this value when complete
+  # tag and commit history are required.
   GIT_DEPTH: '20'
   GIT_SUBMODULE_STRATEGY: none
 
@@ -57,15 +60,13 @@ variables:
 
 # Rules
 
-# Release is intentionally restricted to the main branch. Do not add the
-# repository-specific dev release behavior to this shared template.
+# Main-branch rule for release and deployment jobs.
 .main-branch-rules: &main-branch-rules
   - if: '$CI_COMMIT_BRANCH == "main"'
     when: on_success
   - when: never
 
-# Check jobs run only for merge requests targeting dev or main. The dev target
-# here is for normal checks; release remains main-only above.
+# Merge-request rule for checks targeting dev or main.
 .check-rules: &check-rules
   - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/'
     when: always
@@ -73,7 +74,7 @@ variables:
 
 # Caches
 
-# Keep the lockfile in each cache key so dependency changes invalidate only the
+# Keep each lockfile in its cache key so dependency changes invalidate only the
 # relevant package-manager cache.
 .bun-cache: &bun-cache
   key:
@@ -106,48 +107,55 @@ variables:
 
 # Scripts
 
-# Install the tools required by both package-manager modes.
+# Install the tools shared by both package-manager modes.
 .install-packages: &install-packages
   - apk add --no-cache curl git
 
-# Optional SSH setup. Keep this block commented unless dependency installation
-# needs a private Git repository. `SSH_HOST` must be provided by a CI/CD variable.
-# To enable it, uncomment this block and the `- *setup-ssh-and-scan` line in the
-# active Bun or pnpm setup anchor below.
-# .setup-ssh-and-scan: &setup-ssh-and-scan
-#   - apk add --no-cache openssh-client
-#   - mkdir -p ~/.ssh
-#   - chmod 700 ~/.ssh
-#   - cp "${CI_SSH_PRIVATE_KEY_FOR_PACK}" ~/.ssh/id_ed25519
-#   - chmod 600 ~/.ssh/id_ed25519
-#   - ssh-keyscan -H "${SSH_HOST:?must be set}" >> ~/.ssh/known_hosts
-#   - chmod 644 ~/.ssh/known_hosts
+# Optional SSH setup.
+#
+# This reusable command group is inert until referenced by a package-manager
+# setup. `SSH_HOST` and `CI_SSH_PRIVATE_KEY_FOR_PACK` must be provided as CI/CD
+# variables when the group is used.
+.setup-ssh-and-scan: &setup-ssh-and-scan
+  - apk add --no-cache openssh-client
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - cp "${CI_SSH_PRIVATE_KEY_FOR_PACK:?must be set}" ~/.ssh/id_ed25519
+  - chmod 600 ~/.ssh/id_ed25519
+  - ssh-keyscan -H "${SSH_HOST:?must be set}" >> ~/.ssh/known_hosts
+  - chmod 644 ~/.ssh/known_hosts
 
-# Bun uses its documented frozen-lockfile install. The CLI cache-dir option
-# keeps the cache location explicit and avoids writing a repository bunfig.toml.
+# Bun install setup.
+#
+# Install dependencies with Bun and a frozen lockfile. The explicit cache path
+# avoids writing a repository bunfig.toml.
 .setup-bun-and-install-dependencies: &setup-bun-and-install-dependencies
   - *install-packages
   # - *setup-ssh-and-scan
-  - bun install --cache-dir "${BUN_CACHE_DIR}" --frozen-lockfile
+  - bun install --cache-dir "${BUN_CACHE_DIR:?must be set}" --frozen-lockfile
 
-# pnpm is installed with the standalone binary installer instead of Corepack or
-# npm. `latest` is intentional: the organization tracks the latest pnpm line.
+# pnpm install setup.
+#
+# Install pnpm with the standalone installer and use a frozen lockfile.
+# `PNPM_VERSION=latest` intentionally follows the latest pnpm release line.
 .setup-pnpm-and-install-dependencies: &setup-pnpm-and-install-dependencies
   - *install-packages
   # - *setup-ssh-and-scan
-  - export PATH="$PNPM_HOME/bin:$PATH"
+  - export PATH="${PNPM_HOME:?must be set}/bin:$PATH"
   - curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=latest sh -
-  - pnpm config set store-dir "${PNPM_STORE_DIR}"
+  - pnpm config set store-dir "${PNPM_STORE_DIR:?must be set}"
   - pnpm install --frozen-lockfile
 
-# Job templates
+# Job templates for each package-manager mode.
 
 .check-job:
   stage: check
 
   rules: *check-rules
 
-# Bun mode (default). Keep this block active when the repository uses bun.lock.
+# Bun job template.
+#
+# Select this template when the project uses Bun and bun.lock.
 .bun-check-job:
   extends: .check-job
   image: oven/bun:alpine
@@ -156,8 +164,9 @@ variables:
 
   before_script: *setup-bun-and-install-dependencies
 
-# pnpm mode. To switch modes, comment out `.bun-check-job` and the active Bun
-# jobs below, then uncomment `.pnpm-check-job` and the matching pnpm jobs.
+# pnpm job template.
+#
+# Select this template when the project uses pnpm and pnpm-lock.yaml.
 # .pnpm-check-job:
 #   extends: .check-job
 #   image: node:26-alpine
@@ -166,9 +175,9 @@ variables:
 #
 #   before_script: *setup-pnpm-and-install-dependencies
 
-# Jobs: check (Bun mode)
+# Check jobs: Bun.
 #
-# Keep exactly one package-manager version of each job active.
+# Keep one package-manager variant of each check job enabled.
 
 lint:
   extends: .bun-check-job
@@ -188,9 +197,9 @@ build:
   script:
     - bun run build
 
-# Jobs: check (pnpm mode)
+# Check jobs: pnpm.
 #
-# Uncomment this whole block after disabling the Bun-mode jobs above.
+# Keep one package-manager variant of each check job enabled.
 #
 # lint:
 #   extends: .pnpm-check-job
@@ -210,14 +219,13 @@ build:
 #   script:
 #     - pnpm run build
 
-# Jobs: release
+# Release job.
 #
-# Release is disabled by default because not every repository has a release
-# configuration. To enable it, uncomment both `- release` under `stages` and
-# this job. Its rules intentionally trigger on main only.
+# Use this job when the repository has semantic-release configuration and the
+# required GitLab release variables. The job follows the main-branch rules.
 #
-# The semantic-release plugin major ranges remain intentionally constrained:
-# update them as one tested set rather than independently floating them.
+# Keep the semantic-release package ranges synchronized and update them as one
+# tested set.
 # release:
 #   stage: release
 #   image: node:26-alpine
