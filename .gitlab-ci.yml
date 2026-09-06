@@ -7,6 +7,9 @@
 #     ref: main
 
 # Stages
+#
+# Keep `release` commented unless this repository has a semantic-release
+# configuration and the required GitLab release variables.
 
 stages:
   - check
@@ -14,6 +17,7 @@ stages:
 
 # Defaults
 
+# Shared defaults apply to every non-hidden job unless the job overrides them.
 default:
   interruptible: true
 
@@ -28,35 +32,24 @@ default:
 
 variables:
   # Git checkout behavior.
-  # Keep check pipelines shallow; release jobs override this to '0' for full tag/history access.
+  # Check jobs use a shallow checkout; the release job overrides this to `0`
+  # so semantic-release can inspect the complete tag and commit history.
   GIT_DEPTH: '20'
   GIT_SUBMODULE_STRATEGY: none
 
   # GitLab cache archive tuning.
-  # GitLab CI cache still creates an archive; these settings reduce compression overhead.
+  # These settings reduce compression overhead for dependency caches.
   CACHE_COMPRESSION_FORMAT: tarzstd
   CACHE_COMPRESSION_LEVEL: fastest
 
-  # Default: GitLab CI cache archive paths inside the project directory.
-  # Works on shared/self-hosted runners without runner config changes.
+  # Project-local cache paths. GitLab cache paths must stay inside the checkout.
   BUN_CACHE_DIR: .cache/bun/install/cache
   NPM_CONFIG_CACHE: .cache/npm
-  PNPM_STORE_DIR: .cache/pnpm/store
 
-  # Alternative: local Docker volume cache, no GitLab cache archive/compression.
-  # Requires runner config.toml volumes, for example:
-  #   [runners.docker]
-  #     volumes = [
-  #       "gitlab-runner-builds:/builds",
-  #       "gitlab-runner-cache:/cache",
-  #       "bun-install-cache:/bun-cache",
-  #       "npm-cache:/npm-cache",
-  #       "pnpm-cache:/pnpm-cache",
-  #     ]
-  # Then uncomment these paths and remove/disable the job `cache:` blocks below.
-  # BUN_CACHE_DIR: /bun-cache/${CI_PROJECT_PATH_SLUG}
-  # NPM_CONFIG_CACHE: /npm-cache/${CI_PROJECT_PATH_SLUG}
-  # PNPM_STORE_DIR: /pnpm-cache/${CI_PROJECT_PATH_SLUG}/store
+  # pnpm standalone installation writes its executable to PNPM_HOME. Keep that
+  # directory outside the cached store so binaries are recreated per job.
+  PNPM_HOME: $CI_PROJECT_DIR/.pnpm
+  PNPM_STORE_DIR: .cache/pnpm/store
 
   # npm / semantic-release install hardening.
   NPM_CONFIG_IGNORE_SCRIPTS: 'true'
@@ -64,18 +57,24 @@ variables:
 
 # Rules
 
+# Release is intentionally restricted to the main branch. Do not add the
+# repository-specific dev release behavior to this shared template.
 .main-branch-rules: &main-branch-rules
-  - if: $CI_COMMIT_BRANCH == "main"
+  - if: '$CI_COMMIT_BRANCH == "main"'
     when: on_success
   - when: never
 
-.mr-to-dev-or-main-rules: &mr-to-dev-or-main-rules
-  - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/
+# Check jobs run only for merge requests targeting dev or main. The dev target
+# here is for normal checks; release remains main-only above.
+.check-rules: &check-rules
+  - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^(dev|main)$/'
     when: always
   - when: never
 
 # Caches
 
+# Keep the lockfile in each cache key so dependency changes invalidate only the
+# relevant package-manager cache.
 .bun-cache: &bun-cache
   key:
     files:
@@ -107,44 +106,69 @@ variables:
 
 # Scripts
 
-.setup-bun-cache-config: &setup-bun-cache-config |
-  mkdir -p "${BUN_CACHE_DIR}"
-  printf '[install.cache]\ndir = "%s"\n' "${BUN_CACHE_DIR}" > ~/.bunfig.toml
+# Install the tools required by both package-manager modes.
+.install-packages: &install-packages
+  - apk add --no-cache curl git
 
+# Optional SSH setup. Keep this block commented unless dependency installation
+# needs a private Git repository. `SSH_HOST` must be provided by a CI/CD variable.
+# To enable it, uncomment this block and the `- *setup-ssh-and-scan` line in the
+# active Bun or pnpm setup anchor below.
+# .setup-ssh-and-scan: &setup-ssh-and-scan
+#   - apk add --no-cache openssh-client
+#   - mkdir -p ~/.ssh
+#   - chmod 700 ~/.ssh
+#   - cp "${CI_SSH_PRIVATE_KEY_FOR_PACK}" ~/.ssh/id_ed25519
+#   - chmod 600 ~/.ssh/id_ed25519
+#   - ssh-keyscan -H "${SSH_HOST:?must be set}" >> ~/.ssh/known_hosts
+#   - chmod 644 ~/.ssh/known_hosts
+
+# Bun uses its documented frozen-lockfile install. The CLI cache-dir option
+# keeps the cache location explicit and avoids writing a repository bunfig.toml.
 .setup-bun-and-install-dependencies: &setup-bun-and-install-dependencies
-  - *setup-bun-cache-config
-  - bun install --frozen-lockfile
+  - *install-packages
+  # - *setup-ssh-and-scan
+  - bun install --cache-dir "${BUN_CACHE_DIR}" --frozen-lockfile
 
+# pnpm is installed with the standalone binary installer instead of Corepack or
+# npm. `latest` is intentional: the organization tracks the latest pnpm line.
 .setup-pnpm-and-install-dependencies: &setup-pnpm-and-install-dependencies
-  - *setup-bun-cache-config
-  - npm install --global pnpm@latest
+  - *install-packages
+  # - *setup-ssh-and-scan
+  - export PATH="$PNPM_HOME/bin:$PATH"
+  - curl -fsSL https://get.pnpm.io/install.sh | env PNPM_VERSION=latest sh -
   - pnpm config set store-dir "${PNPM_STORE_DIR}"
   - pnpm install --frozen-lockfile
 
 # Job templates
 
-.bun-check-job:
+.check-job:
   stage: check
-  image: oven/bun:alpine
 
-  rules: *mr-to-dev-or-main-rules
+  rules: *check-rules
+
+# Bun mode (default). Keep this block active when the repository uses bun.lock.
+.bun-check-job:
+  extends: .check-job
+  image: oven/bun:alpine
 
   cache: *bun-cache
 
   before_script: *setup-bun-and-install-dependencies
 
-# Optional pnpm check template. Switch check jobs to this template if the project uses pnpm.
-# .pnpm-check-job: &pnpm-check-job
-#   stage: check
+# pnpm mode. To switch modes, comment out `.bun-check-job` and the active Bun
+# jobs below, then uncomment `.pnpm-check-job` and the matching pnpm jobs.
+# .pnpm-check-job:
+#   extends: .check-job
 #   image: node:26-alpine
-#
-#   rules: *mr-to-dev-or-main-rules
 #
 #   cache: *pnpm-cache
 #
 #   before_script: *setup-pnpm-and-install-dependencies
 
-# Jobs: check
+# Jobs: check (Bun mode)
+#
+# Keep exactly one package-manager version of each job active.
 
 lint:
   extends: .bun-check-job
@@ -164,14 +188,36 @@ build:
   script:
     - bun run build
 
+# Jobs: check (pnpm mode)
+#
+# Uncomment this whole block after disabling the Bun-mode jobs above.
+#
+# lint:
+#   extends: .pnpm-check-job
+#
+#   script:
+#     - pnpm run lint
+#
+# typecheck:
+#   extends: .pnpm-check-job
+#
+#   script:
+#     - pnpm run typecheck
+#
+# build:
+#   extends: .pnpm-check-job
+#
+#   script:
+#     - pnpm run build
+
 # Jobs: release
 #
-# Release job template.
-# To enable:
-#   1. Uncomment `release` in `stages`.
-#   2. Uncomment this job.
-#   3. Ensure semantic-release config and GitLab token variables are configured.
+# Release is disabled by default because not every repository has a release
+# configuration. To enable it, uncomment both `- release` under `stages` and
+# this job. Its rules intentionally trigger on main only.
 #
+# The semantic-release plugin major ranges remain intentionally constrained:
+# update them as one tested set rather than independently floating them.
 # release:
 #   stage: release
 #   image: node:26-alpine
@@ -190,32 +236,10 @@ build:
 #         --ignore-scripts=true \
 #         --min-release-age=1 \
 #         semantic-release@^25 \
-#         @semantic-release/changelog@latest \
-#         @semantic-release/git@latest \
-#         @semantic-release/gitlab@latest \
+#         @semantic-release/changelog@^6 \
+#         @semantic-release/git@^10 \
+#         @semantic-release/gitlab@^13 \
 #         conventional-changelog-conventionalcommits@^9
 #
 #   script:
 #     - semantic-release
-#
-# Local Docker volume cache variant for release:
-# If using NPM_CONFIG_CACHE=/npm-cache/${CI_PROJECT_PATH_SLUG}, remove/comment the release job `cache:` line above.
-#
-# Local Docker volume cache variant for check jobs:
-# If using BUN_CACHE_DIR=/bun-cache/${CI_PROJECT_PATH_SLUG}, remove/comment `cache: *bun-cache` from `.bun-check-job`.
-# If using PNPM_STORE_DIR=/pnpm-cache/${CI_PROJECT_PATH_SLUG}/store, remove/comment `cache: *pnpm-cache` from `.pnpm-check-job`.
-
-# Jobs: deploy
-#
-# deploy:
-#   stage: deploy
-#   image: alpine:latest
-#
-#   rules: *main-branch-rules
-#
-#   environment:
-#     name: production
-#     url: https://example.com
-#
-#   script:
-#     - echo "deploy"
