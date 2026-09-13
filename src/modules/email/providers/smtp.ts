@@ -7,16 +7,18 @@ import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 import { BaseEmailProvider } from './base';
 import { EmailProviderError } from './error';
 
-export class EmailSmtpProvider extends BaseEmailProvider {
+import type { LeanedEmailProvider } from './';
+
+export class EmailSmtpProvider extends BaseEmailProvider<EmailProviderConfigs.Smtp> {
     readonly #transport: Mail<SMTPTransport.SMTPSentMessageInfo>;
 
-    constructor(config: EmailProviderConfigs.Smtp) {
-        super();
+    constructor(provider: LeanedEmailProvider) {
+        super(provider);
         this.#transport = createTransport({
-            auth: config.username && config.password
+            auth: this.config.username && this.config.password
                 ? {
-                    pass: config.password,
-                    user: config.username,
+                    pass: this.config.password,
+                    user: this.config.username,
                 }
                 : undefined,
             connectionTimeout: 10000,
@@ -24,12 +26,12 @@ export class EmailSmtpProvider extends BaseEmailProvider {
             disableUrlAccess: true,
             dnsTimeout: 10000,
             greetingTimeout: 10000,
-            host: config.host,
-            port: config.port,
-            requireTLS: config.tls.required,
-            secure: config.secure,
+            host: this.config.host,
+            port: this.config.port,
+            requireTLS: this.config.tls.required,
+            secure: this.config.secure,
             socketTimeout: 60000,
-            tls: { rejectUnauthorized: config.tls.rejectUnauthorized },
+            tls: { rejectUnauthorized: this.config.tls.rejectUnauthorized },
         });
     }
 
@@ -70,7 +72,7 @@ export class EmailSmtpProvider extends BaseEmailProvider {
     }
 
     // Public methods
-    override close() {
+    close() {
         this.#transport.close();
     }
 

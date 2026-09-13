@@ -1,12 +1,18 @@
 import { EmailProviderCode } from '@kcs-project/pack/constants/email';
-import type { EmailProvider } from '@kcs-project/pack/models/email/provider';
-import type { EmailProviderConfigs } from '@kcs-project/pack/types/email';
+import type {
+    EmailProvider,
+    EmailProviderDocument,
+} from '@kcs-project/pack/models/email/provider';
+import type { GetLeanResultType } from 'mongoose';
 
 import type { BaseEmailProvider } from './base';
 import { EmailProviderError } from './error';
 import { EmailSmtpProvider } from './smtp';
 
-const instances = new Map<string, BaseEmailProvider>();
+export type LeanedEmailProvider = GetLeanResultType<EmailProvider, EmailProviderDocument, 'findOne'>;
+
+// Constants/Variables
+const instances = new Map<string, BaseEmailProvider<any>>();
 
 export async function closeEmailProviderInstances() {
     const results = await Promise.allSettled([...instances.values()].map(async (instance) => {
@@ -18,13 +24,13 @@ export async function closeEmailProviderInstances() {
     if (errors.length) throw new AggregateError(errors, 'Email provider cleanup failed');
 }
 
-export function getOrCreateEmailProviderInstance(provider: EmailProvider) {
-    const key = `${provider.providerCode}:${provider.configHash}`;
+export function getOrCreateEmailProviderInstance(provider: LeanedEmailProvider) {
+    const key = `${provider.code}:${provider.configHash}`;
     let instance = instances.get(key);
     if (instance) return instance;
-    switch (provider.providerCode) {
+    switch (provider.code) {
         case EmailProviderCode.Smtp:
-            instance = new EmailSmtpProvider(provider.config as EmailProviderConfigs.Smtp);
+            instance = new EmailSmtpProvider(provider);
             break;
         default: throw new EmailProviderError('Unsupported Email provider', 'not-accepted');
     }

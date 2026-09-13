@@ -12,6 +12,7 @@ import { bullMqOptions } from '@/constants/bullmq';
 import { getErrorMessage } from '@/utils/error';
 import type { PrefixedLogger } from '@/utils/logger/prefixed';
 
+import type { LeanedEmailProvider } from '../providers';
 import { getOrCreateEmailProviderInstance } from '../providers';
 import { EmailProviderError } from '../providers/error';
 
@@ -42,7 +43,7 @@ export function createEmailSendJobBullMqWorker(logger: PrefixedLogger) {
 
         if (!emailSendRecord) return;
         // TODO: caches
-        let emailProviders;
+        let emailProviders: LeanedEmailProvider[];
         try {
             emailProviders = await EmailProviderModel
                 .find({ enabled: true })
