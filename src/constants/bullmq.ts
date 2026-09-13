@@ -1,6 +1,5 @@
 import { RedisClient } from 'bun';
 
-import { projectRedisKeyPrefix } from '@kcs-project/pack/constants';
 import { createBunRedisClient } from 'bullmq';
 import logger from 'consola';
 
@@ -17,8 +16,3 @@ export const bullMqRedisConnection = createBunRedisClient(
 );
 
 bullMqRedisConnection.on('error', (error) => logger.error('BullMQ redis connection error:', error));
-
-export const bullMqOptions = {
-    connection: bullMqRedisConnection,
-    prefix: `${projectRedisKeyPrefix}:bull`,
-} as const;

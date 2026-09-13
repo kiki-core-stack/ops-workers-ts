@@ -1,4 +1,4 @@
-import { BullMqWorkerGroup } from '@/libs/bullmq-worker-group';
+import { BullMqWorkerGroup } from '@/libs/bullmq/worker-group';
 import { BaseServiceLifecycle } from '@/service/base-lifecycle';
 
 import { closeEmailProviderInstances } from './providers';

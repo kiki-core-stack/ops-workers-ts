@@ -1,8 +1,8 @@
 import { Queue } from 'bullmq';
 
-import { bullMqOptions } from '@/constants/bullmq';
+import { createBullMqOptions } from '@/libs/bullmq';
 
-import { smsModule } from '..';
+import { smsModule } from '../';
 
 import type { SmsSendJobData } from './types';
 
@@ -26,7 +26,7 @@ export const smsSendJobQueue = new Queue<SmsSendJobData, void, typeof smsSendJob
                 count: 1000,
             },
         },
-        ...bullMqOptions,
+        ...createBullMqOptions(smsSendJobQueueName),
     },
 );
 

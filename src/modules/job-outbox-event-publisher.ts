@@ -165,6 +165,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
             if (!await this.#publishOutboxEvent(outboxEvent)) return;
             await this.#deletePublishedOutboxEvent(outboxEvent);
         } catch (error) {
+            this.logger.error('process outbox event error:', error);
             if (!this.lifecycleCancellationSignal.aborted) {
                 await this.#handlePublishOutboxEventFailure(outboxEvent, error);
             }

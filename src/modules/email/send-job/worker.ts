@@ -8,7 +8,7 @@ import type { UpdateQuery } from 'mongoose';
 import { Types } from 'mongoose';
 import { nanoid } from 'nanoid';
 
-import { bullMqOptions } from '@/constants/bullmq';
+import { createBullMqOptions } from '@/libs/bullmq';
 import { getErrorMessage } from '@/utils/error';
 import type { PrefixedLogger } from '@/utils/logger/prefixed';
 
@@ -146,7 +146,7 @@ export function createEmailSendJobBullMqWorker(logger: PrefixedLogger) {
             autorun: false,
             concurrency: Math.abs(Number(process.env.EMAIL_SEND_JOB_WORKER_CONCURRENCY)) || 4,
             maxStalledCount: 1,
-            ...bullMqOptions,
+            ...createBullMqOptions(emailSendJobQueueName),
         },
     );
 }

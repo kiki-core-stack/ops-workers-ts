@@ -1,6 +1,6 @@
 import { Queue } from 'bullmq';
 
-import { bullMqOptions } from '@/constants/bullmq';
+import { createBullMqOptions } from '@/libs/bullmq';
 
 import { emailModule } from '../';
 
@@ -26,7 +26,7 @@ export const emailSendJobQueue = new Queue<EmailSendJobData, void, typeof emailS
                 count: 1000,
             },
         },
-        ...bullMqOptions,
+        ...createBullMqOptions(emailSendJobQueueName),
     },
 );
 
