@@ -1,16 +1,15 @@
 import type { SmsSendRecord } from '@kcs-project/pack/models/sms/send-record';
 import type { SmsProviderConfigs } from '@kcs-project/pack/types/sms';
 import type { ReadonlyRecord } from '@kikiutils/shared/types';
-import type {
-    AxiosInstance,
-    AxiosResponse,
-} from 'axios';
-import axios, { AxiosError } from 'axios';
+import type { AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 
 import { getErrorMessage } from '@/utils/error';
 
 import { BaseSmsProvider } from './base';
 import { SmsProviderError } from './error';
+
+import type { LeanedSmsProvider } from './';
 
 // Constants/Variables
 const apiErrorResponseCodeToMessageMap: ReadonlyRecord<string, string> = {
@@ -49,14 +48,9 @@ const retryableApiErrorResponseCodes = new Set([
     '99999',
 ]);
 
-export class SmsTwSmsProvider extends BaseSmsProvider {
-    readonly #axiosInstance: AxiosInstance;
-    readonly #config: SmsProviderConfigs.TwSms;
-
-    constructor(config: SmsProviderConfigs.TwSms) {
-        super();
-        this.#axiosInstance = axios.create({ baseURL: config.apiUrl });
-        this.#config = config;
+export class SmsTwSmsProvider extends BaseSmsProvider<SmsProviderConfigs.TwSms> {
+    constructor(provider: LeanedSmsProvider) {
+        super(provider);
     }
 
     // Private methods
@@ -76,23 +70,21 @@ export class SmsTwSmsProvider extends BaseSmsProvider {
     }
 
     // Public methods
-    close() {}
-
     override async sendSms(smsSendRecord: SmsSendRecord, signal?: AbortSignal) {
         if (signal?.aborted) throw new SmsProviderError('Delivery cancelled before SMS call', 'not-accepted', true);
 
         let response: AxiosResponse | undefined;
         let responseError: unknown;
         try {
-            response = await this.#axiosInstance.post(
+            response = await this.axiosInstance.post(
                 '/json/sms_send.php',
                 {},
                 {
                     params: {
                         message: smsSendRecord.content,
                         mobile: smsSendRecord.to.replace(/^\+/, ''),
-                        password: this.#config.password,
-                        username: this.#config.username,
+                        password: this.config.password,
+                        username: this.config.username,
                     },
                     signal,
                 },

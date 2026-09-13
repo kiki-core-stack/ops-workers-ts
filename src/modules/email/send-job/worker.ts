@@ -49,9 +49,10 @@ export function createEmailSendJobBullMqWorker(logger: PrefixedLogger) {
                 .find({ enabled: true })
                 .sort({ priority: -1 })
                 .select([
+                    'apiProxyUrl',
+                    'cacheKey',
+                    'code',
                     'config',
-                    'configHash',
-                    'providerCode',
                 ])
                 .lean();
         } catch (error) {
@@ -81,7 +82,7 @@ export function createEmailSendJobBullMqWorker(logger: PrefixedLogger) {
         if (!emailProviders.length) $set.failureReason = '沒有可用的服務商';
         else {
             for (const emailProvider of emailProviders) {
-                $set.provider = emailProvider;
+                $set.provider = emailProvider._id;
                 try {
                     const emailProviderInstance = getOrCreateEmailProviderInstance(emailProvider);
                     const sendResult = await emailProviderInstance.sendEmail(emailSendRecord, signal);

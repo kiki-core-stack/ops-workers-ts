@@ -1,16 +1,15 @@
 import type { SmsSendRecord } from '@kcs-project/pack/models/sms/send-record';
 import type { SmsProviderConfigs } from '@kcs-project/pack/types/sms';
 import type { ReadonlyRecord } from '@kikiutils/shared/types';
-import type {
-    AxiosInstance,
-    AxiosResponse,
-} from 'axios';
-import axios, { AxiosError } from 'axios';
+import type { AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 
 import { getErrorMessage } from '@/utils/error';
 
 import { BaseSmsProvider } from './base';
 import { SmsProviderError } from './error';
+
+import type { LeanedSmsProvider } from './';
 
 interface SendSmsResponseData {
     accountPoint?: string;
@@ -35,14 +34,9 @@ const apiErrorResponseCodeToMessageMap: ReadonlyRecord<string, string> = {
 
 const retryableApiErrorResponseCodes = new Set(['-9']);
 
-export class SmsMitakeProvider extends BaseSmsProvider {
-    readonly #axiosInstance: AxiosInstance;
-    readonly #config: SmsProviderConfigs.Mitake;
-
-    constructor(config: SmsProviderConfigs.Mitake) {
-        super();
-        this.#axiosInstance = axios.create({ baseURL: config.apiUrl });
-        this.#config = config;
+export class SmsMitakeProvider extends BaseSmsProvider<SmsProviderConfigs.Mitake> {
+    constructor(provider: LeanedSmsProvider) {
+        super(provider);
     }
 
     // Private methods
@@ -84,21 +78,19 @@ export class SmsMitakeProvider extends BaseSmsProvider {
     }
 
     // Public methods
-    close() {}
-
     async sendSms(smsSendRecord: SmsSendRecord, signal?: AbortSignal) {
         if (signal?.aborted) throw new SmsProviderError('Delivery cancelled before SMS call', 'not-accepted', true);
 
         let response: AxiosResponse | undefined;
         let responseError: unknown;
         try {
-            response = await this.#axiosInstance.post(
+            response = await this.axiosInstance.post(
                 '/b2c/mtk/SmSend',
                 {
                     dstaddr: smsSendRecord.to,
-                    password: this.#config.password,
+                    password: this.config.password,
                     smbody: smsSendRecord.content.replace(/\r?\n/g, String.fromCharCode(6)),
-                    username: this.#config.username,
+                    username: this.config.username,
                 },
                 {
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

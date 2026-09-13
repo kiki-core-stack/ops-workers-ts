@@ -13,6 +13,7 @@ import { getErrorMessage } from '@/utils/error';
 import type { PrefixedLogger } from '@/utils/logger/prefixed';
 
 import { getOrCreateSmsProviderInstance } from '../providers';
+import type { LeanedSmsProvider } from '../providers';
 import { SmsProviderError } from '../providers/error';
 
 import { smsSendJobQueueName } from './queue';
@@ -42,15 +43,16 @@ export function createSmsSendJobBullMqWorker(logger: PrefixedLogger) {
 
         if (!smsSendRecord) return;
         // TODO: caches
-        let smsProviders;
+        let smsProviders: LeanedSmsProvider[];
         try {
             smsProviders = await SmsProviderModel
                 .find({ enabled: true })
                 .sort({ priority: -1 })
                 .select([
+                    'apiProxyUrl',
+                    'cacheKey',
+                    'code',
                     'config',
-                    'configHash',
-                    'providerCode',
                 ])
                 .lean();
         } catch (error) {
@@ -80,7 +82,7 @@ export function createSmsSendJobBullMqWorker(logger: PrefixedLogger) {
         if (!smsProviders.length) $set.failureReason = '沒有可用的服務商';
         else {
             for (const smsProvider of smsProviders) {
-                $set.provider = smsProvider;
+                $set.provider = smsProvider._id;
                 try {
                     const smsProviderInstance = getOrCreateSmsProviderInstance(smsProvider);
                     const sendResult = await smsProviderInstance.sendSms(smsSendRecord, signal);

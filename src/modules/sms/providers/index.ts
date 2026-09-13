@@ -1,14 +1,21 @@
 import { SmsProviderCode } from '@kcs-project/pack/constants/sms';
-import type { SmsProvider } from '@kcs-project/pack/models/sms/provider';
-import type { SmsProviderConfigs } from '@kcs-project/pack/types/sms';
+import type {
+    SmsProvider,
+    SmsProviderDocument,
+} from '@kcs-project/pack/models/sms/provider';
+import type { GetLeanResultType } from 'mongoose';
 
 import type { BaseSmsProvider } from './base';
 import { SmsProviderError } from './error';
 import { SmsMitakeProvider } from './mitake';
 import { SmsTwSmsProvider } from './tw-sms';
 
-const instances = new Map<string, BaseSmsProvider>();
+export type LeanedSmsProvider = GetLeanResultType<SmsProvider, SmsProviderDocument, 'findOne'>;
 
+// Constants/Variables
+const instances = new Map<string, BaseSmsProvider<any>>();
+
+// Functions
 export async function closeSmsProviderInstances() {
     const results = await Promise.allSettled([...instances.values()].map(async (instance) => {
         await instance.close();
@@ -19,20 +26,19 @@ export async function closeSmsProviderInstances() {
     if (errors.length) throw new AggregateError(errors, 'Sms provider cleanup failed');
 }
 
-export function getOrCreateSmsProviderInstance(provider: SmsProvider) {
-    const key = `${provider.providerCode}:${provider.configHash}`;
-    let instance = instances.get(key);
+export function getOrCreateSmsProviderInstance(provider: LeanedSmsProvider) {
+    let instance = instances.get(provider.cacheKey);
     if (instance) return instance;
-    switch (provider.providerCode) {
+    switch (provider.code) {
         case SmsProviderCode.Mitake:
-            instance = new SmsMitakeProvider(provider.config as SmsProviderConfigs.Mitake);
+            instance = new SmsMitakeProvider(provider);
             break;
         case SmsProviderCode.TwSms:
-            instance = new SmsTwSmsProvider(provider.config as SmsProviderConfigs.TwSms);
+            instance = new SmsTwSmsProvider(provider);
             break;
         default: throw new SmsProviderError('Unsupported Sms provider', 'not-accepted');
     }
 
-    instances.set(key, instance);
+    instances.set(provider.cacheKey, instance);
     return instance;
 }

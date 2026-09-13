@@ -25,8 +25,7 @@ export async function closeEmailProviderInstances() {
 }
 
 export function getOrCreateEmailProviderInstance(provider: LeanedEmailProvider) {
-    const key = `${provider.code}:${provider.configHash}`;
-    let instance = instances.get(key);
+    let instance = instances.get(provider.cacheKey);
     if (instance) return instance;
     switch (provider.code) {
         case EmailProviderCode.Smtp:
@@ -35,6 +34,6 @@ export function getOrCreateEmailProviderInstance(provider: LeanedEmailProvider) 
         default: throw new EmailProviderError('Unsupported Email provider', 'not-accepted');
     }
 
-    instances.set(key, instance);
+    instances.set(provider.cacheKey, instance);
     return instance;
 }
