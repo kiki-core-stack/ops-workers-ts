@@ -1,1 +1,2 @@
 - Outbox event 的傳遞與消費改採 MongoDB CDC／Kafka；實作時不考慮任何舊資料，視為全新架構重新編寫。
+- sms的provider classes移動到pack, 新增獲取餘額或點數方法，串上mabk與af

@@ -2,6 +2,7 @@ import { BaseServiceLifecycle } from '@/service/base-lifecycle';
 
 import { emailModule } from './email';
 import { jobOutboxEventPublisherModule } from './job-outbox-event-publisher';
+import { smsModule } from './sms';
 
 class MainModule extends BaseServiceLifecycle {
     readonly #startedModules: BaseServiceLifecycle[] = [];
@@ -32,6 +33,7 @@ class MainModule extends BaseServiceLifecycle {
     start() {
         return this.executeStart(async () => {
             await this.#startChildModule(emailModule);
+            await this.#startChildModule(smsModule);
             await this.#startChildModule(jobOutboxEventPublisherModule);
         });
     }

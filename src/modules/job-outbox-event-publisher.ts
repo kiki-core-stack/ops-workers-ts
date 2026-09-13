@@ -20,7 +20,12 @@ import {
     emailSendJobQueue,
     emailSendJobQueueName,
 } from './email/send-job/queue';
-import type { EmailSendJobData } from './email/send-job/queue';
+import type { EmailSendJobData } from './email/send-job/types';
+import {
+    smsSendJobQueue,
+    smsSendJobQueueName,
+} from './sms/send-job/queue';
+import type { SmsSendJobData } from './sms/send-job/types';
 
 type LeanedJobOutboxEvent = GetLeanResultType<JobOutboxEvent, JobOutboxEventDocument, 'findOne'>;
 
@@ -178,6 +183,11 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                     { jobId: emailSendJobData.recordId },
                 );
 
+                return true;
+            }
+            case JobType.SendSms: {
+                const smsSendJobData = outboxEvent.payload as SmsSendJobData;
+                await smsSendJobQueue.add(smsSendJobQueueName, smsSendJobData, { jobId: smsSendJobData.recordId });
                 return true;
             }
             default:

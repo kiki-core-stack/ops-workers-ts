@@ -13,9 +13,10 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#0aa35db174ac125d4733a087a28e1abcee29e76f",
+    "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#e1d4b6bdac322bbe26b6d13a4b2ec568b0dc9066",
     "@kikiutils/mongoose": "^7.0.3",
     "@kikiutils/shared": "^18.0.1",
+    "axios": "^1.20.0",
     "bullmq": "^6.3.4",
     "consola": "^3.4.2",
     "date-fns": "^4.4.0",
