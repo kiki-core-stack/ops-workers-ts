@@ -56,8 +56,8 @@ export class EmailSendRecordReconciler extends BaseServiceLifecycle {
         const sendRecordId = sendRecord._id.toString();
         const job = await emailSendJobQueue.getJob(sendRecordId);
         if (!job) {
-            // A removed job no longer proves whether the provider was called.
-            // TODO: Re-enqueue only after provider idempotency or delivery lookup is available.
+            // A removed job does not prove whether the provider was called,
+            // so re-enqueuing could duplicate the email.
             await this.#markSendRecordDeliveryUnknown(sendRecord, 'Email send job is no longer available');
             return;
         }

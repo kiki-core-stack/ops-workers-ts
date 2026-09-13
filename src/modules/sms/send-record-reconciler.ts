@@ -56,8 +56,8 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
         const sendRecordId = sendRecord._id.toString();
         const job = await smsSendJobQueue.getJob(sendRecordId);
         if (!job) {
-            // A removed job no longer proves whether the provider was called.
-            // TODO: Re-enqueue only after provider idempotency or delivery lookup is available.
+            // A removed job does not prove whether the provider was called,
+            // so re-enqueuing could duplicate the SMS.
             await this.#markSendRecordDeliveryUnknown(sendRecord, 'Sms send job is no longer available');
             return;
         }
