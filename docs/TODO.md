@@ -1,0 +1,1 @@
+- Outbox event 的傳遞與消費改採 MongoDB CDC／Kafka；實作時不考慮任何舊資料，視為全新架構重新編寫。

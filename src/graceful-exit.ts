@@ -1,35 +1,41 @@
-import type { Server } from 'bun';
-
 import { redisClient } from '@kcs-project/pack/constants/redis';
 import { mongooseConnections } from '@kikiutils/mongoose/constants';
-import { logger } from '@kikiutils/shared/consola';
+import logger from 'consola';
+import type { Promisable } from 'type-fest';
 
-import {
-    emailSendJobRestorer,
-    emailSendJobWorkerManager,
-} from '@/email';
+import { bullMqRedisConnection } from '@/constants/bullmq';
+import { mainModule } from '@/modules/main';
 
+// Constants/Variables
 let isGracefulExitStarted = false;
 
-export async function gracefulExit(server?: Server<any>) {
+// Functions
+export async function gracefulExit() {
     if (isGracefulExitStarted) return;
     isGracefulExitStarted = true;
     logger.info('Starting graceful shutdown...');
-    await server?.stop();
 
-    // Perform operations such as closing the database connection here.
-    const promises = [];
+    const errors: unknown[] = [];
 
-    // Email
-    promises.push(
-        emailSendJobRestorer.stop(),
-        emailSendJobWorkerManager.stop(),
-    );
+    async function collectCleanup(fn: () => Promisable<void>) {
+        try {
+            await fn();
+        } catch (error) {
+            errors.push(error);
+        }
+    }
 
-    await Promise.all(promises);
+    await collectCleanup(async () => {
+        if (!await mainModule.stop()) errors.push(new Error('Module cleanup failed'));
+    });
+
+    bullMqRedisConnection.disconnect();
     redisClient.close();
-    await mongooseConnections.default?.close();
+    await mongooseConnections.default?.close().catch((error) => errors.push(error));
 
-    logger.success('Graceful shutdown completed');
-    process.exit(0);
+    if (!errors.length) logger.success('Graceful shutdown completed');
+    else {
+        process.exitCode = 1;
+        logger.error('Graceful shutdown failed', new AggregateError(errors, 'Graceful shutdown failed'));
+    }
 }
