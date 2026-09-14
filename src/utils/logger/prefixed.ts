@@ -1,4 +1,4 @@
-import logger from 'consola';
+import * as logger from './';
 
 export class PrefixedLogger {
     readonly #prefix: string;

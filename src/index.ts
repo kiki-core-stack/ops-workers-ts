@@ -1,7 +1,6 @@
-import logger from 'consola';
-
 import { gracefulExit } from '@/graceful-exit';
 import { mainModule } from '@/modules/main';
+import * as logger from '@/utils/logger';
 
 // Register events and signals
 process.once('SIGINT', gracefulExit);
