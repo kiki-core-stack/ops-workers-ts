@@ -4,7 +4,7 @@
   "workspaces": {
     "": {
       "dependencies": {
-        "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#8fd16195b3cce8c6c28d746685439c8fff5d467e",
+        "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#b6738c7c186e2fe092eba9c044a03fa73f0388ae",
         "@kikiutils/mongoose": "^7.0.3",
         "@kikiutils/shared": "^18.0.1",
         "axios": "^1.20.0",
@@ -66,7 +66,7 @@
 
     "@es-joy/resolve.exports": ["@es-joy/resolve.exports@1.2.0", "", {}, "sha512-Q9hjxWI5xBM+qW2enxfe8wDKdFWMfd0Z29k5ZJnuBqD/CasY5Zryj09aCA6owbGATWz+39p5uIdaHXpopOcG8g=="],
 
-    "@eslint-community/eslint-plugin-eslint-comments": ["@eslint-community/eslint-plugin-eslint-comments@4.8.0", "", { "dependencies": { "escape-string-regexp": "^4.0.0", "ignore": "^7.0.5" }, "peerDependencies": { "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0" } }, "sha512-bzGg2H83F9p55TKzlNUS/LWb1WF2OqdVX67FK1OadDPLVOhabFRERC7TiDJzk//LedaVnRS5uqK/2f/AZ/+VyA=="],
+    "@eslint-community/eslint-plugin-eslint-comments": ["@eslint-community/eslint-plugin-eslint-comments@4.8.1", "", { "dependencies": { "escape-string-regexp": "^4.0.0", "ignore": "^7.0.5" }, "peerDependencies": { "eslint": "^6.0.0 || ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0" } }, "sha512-vafrdi15JHBFh1qWOAucyJwlEEuhdoMof28jOdKdgnwZ7bXwd6v4wzHYSmAVLwnx0yc7bqAtfJ0EZQV1WAzV/Q=="],
 
     "@eslint-community/eslint-utils": ["@eslint-community/eslint-utils@4.10.1", "", { "dependencies": { "eslint-visitor-keys": "^3.4.3" }, "peerDependencies": { "eslint": "^6.0.0 || ^7.0.0 || >=8.0.0" } }, "sha512-cuadcxVFE8sDK6iWJbs8Sn0av2Nrh2QSGQhVlBW9AaAHqHwjWsZHT8LJ4hFGPh7ASBV2deFdM7H/DPjulmh8rg=="],
 
@@ -100,7 +100,7 @@
 
     "@jridgewell/sourcemap-codec": ["@jridgewell/sourcemap-codec@1.6.0", "", {}, "sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw=="],
 
-    "@kcs-project/pack": ["@kiki-core-stack/pack@github:kiki-core-stack/pack#8fd1619", { "peerDependencies": { "@hono/zod-validator": "^0.9.1", "@kikiutils/mongoose": "^7.0.3", "@kikiutils/shared": "^18.0.1", "consola": "^3.4.2", "es-toolkit": "^1.52.0", "file-type": "^22.0.2", "hono": "^4.13.5", "lru-cache": "^11.5.2", "mongoose": "^9.9.4", "nanoid": "^6.0.1", "sharp": "^0.35.4", "type-fest": "^5.9.0", "ws.io-client": "^0.4.0", "zod": "^4.5.4" }, "optionalPeers": ["@hono/zod-validator", "@kikiutils/mongoose", "@kikiutils/shared", "consola", "es-toolkit", "file-type", "hono", "lru-cache", "mongoose", "nanoid", "sharp", "type-fest", "ws.io-client", "zod"] }, "kiki-core-stack-pack-8fd1619", "sha512-QdkzyIer4OTvFoB2FLhvAN1HjbJ+jjzHOt3Y2eCcF6C9x8dQT+yA9dpv/OcY6SWuvnziBELkdN87zelVF4HgCA=="],
+    "@kcs-project/pack": ["@kiki-core-stack/pack@github:kiki-core-stack/pack#b6738c7", { "peerDependencies": { "@hono/zod-validator": "^0.9.1", "@kikiutils/mongoose": "^7.0.3", "@kikiutils/shared": "^18.0.1", "consola": "^3.4.2", "es-toolkit": "^1.52.0", "file-type": "^22.0.2", "hono": "^4.13.5", "lru-cache": "^11.5.2", "mongoose": "^9.9.4", "nanoid": "^6.0.1", "sharp": "^0.35.4", "type-fest": "^5.9.0", "ws.io-client": "^0.4.0", "zod": "^4.5.4" }, "optionalPeers": ["@hono/zod-validator", "@kikiutils/mongoose", "@kikiutils/shared", "consola", "es-toolkit", "file-type", "hono", "lru-cache", "mongoose", "nanoid", "sharp", "type-fest", "ws.io-client", "zod"] }, "kiki-core-stack-pack-b6738c7", "sha512-VJ0Zzh6cGNseKYMvWFua2asYH8++KzZ0rD+BKcMcU3bN+sB4j9i18DcqIpZSbFwcZH783hdy0dsx+0a7BFxdgQ=="],
 
     "@keyv/bigmap": ["@keyv/bigmap@1.3.1", "", { "dependencies": { "hashery": "^1.4.0", "hookified": "^1.15.0" }, "peerDependencies": { "keyv": "^5.6.0" } }, "sha512-WbzE9sdmQtKy8vrNPa9BRnwZh5UF4s1KTmSK0KUVLo3eff5BlQNNWDnFOouNpKfPKDnms9xynJjsMYjMaT/aFQ=="],
 
@@ -296,7 +296,7 @@
 
     "balanced-match": ["balanced-match@4.0.4", "", {}, "sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA=="],
 
-    "baseline-browser-mapping": ["baseline-browser-mapping@2.11.22", "", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-pWc4w51fBFd7mav43/zKRC+RI6f4yfzQoVlfvE8dECePyfkn1bzLp01Fj0QACcyCZyFhiEMyD2qScfKRWgWibA=="],
+    "baseline-browser-mapping": ["baseline-browser-mapping@2.11.23", "", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-le521dGVfxM7yRX0EikCoSz+rOK+hHzdDt/E7mG1jOJB/6WAAUuwVroLwaB7ApaUsz5Q0kFlDXLSA9MheUIfRQ=="],
 
     "boolbase": ["boolbase@1.0.0", "", {}, "sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww=="],
 
@@ -376,7 +376,7 @@
 
     "empathic": ["empathic@2.0.1", "", {}, "sha512-YGRs8knHhKHVShLkFET/rWAU8kmHbOV5LwN938RHI0pljAJ1Gf6SzXsSmRaEzcXTtOOmVqJ5+WtQPL5uigY50Q=="],
 
-    "enhanced-resolve": ["enhanced-resolve@5.24.5", "", { "dependencies": { "graceful-fs": "^4.2.4", "tapable": "^2.3.3" } }, "sha512-L1l8TNvomm6UVW5B253AGxQagSQr+vGwhMlrrfRS2qmhx46AMpMVJKQYLvWYbysTMY8VoicOvzHzoHMbyzB+4A=="],
+    "enhanced-resolve": ["enhanced-resolve@5.25.0", "", { "dependencies": { "graceful-fs": "^4.2.4", "tapable": "^2.3.3" } }, "sha512-ghq3mhs649mvbarTCAlZn2wRhbfHmzAFiKxoWA14B3VtqnxtZt+wz8BroKXU0tF3GiJsnUldjVncQGZ8qk4rdA=="],
 
     "entities": ["entities@8.1.0", "", {}, "sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA=="],
 

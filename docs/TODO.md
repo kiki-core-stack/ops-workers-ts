@@ -1,3 +1,2 @@
 - Outbox event 的傳遞與消費改採 MongoDB CDC／Kafka；實作時不考慮任何舊資料，視為全新架構重新編寫。
 - sms的provider classes移動到pack, 新增獲取餘額或點數方法，串上mabk與af
-- 目前只有單方面把job標記為死信 但沒有反向處理有關連的資料 會出現send record pending但再也不可能被處理的狀況
