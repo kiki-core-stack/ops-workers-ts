@@ -31,10 +31,16 @@ export default {
             '@semantic-release/commit-analyzer',
             {
                 preset: 'conventionalcommits',
-                releaseRules: releasePatchRuleTypes.map((type) => ({
-                    release: 'patch',
-                    type,
-                })),
+                releaseRules: [
+                    {
+                        breaking: true,
+                        release: 'major',
+                    },
+                    ...releasePatchRuleTypes.map((type) => ({
+                        release: 'patch',
+                        type,
+                    })),
+                ],
             },
         ],
         [
