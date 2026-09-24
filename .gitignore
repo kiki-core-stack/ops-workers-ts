@@ -167,6 +167,9 @@ CLAUDE.local.md
 .serena/project.local.yml
 repomix-output.*
 
+# Local browsers
+.playwright-mcp/
+
 # pnpm v8-compile-cache dependency
 # - https://github.com/pnpm/pnpm/issues/7330
 node-compile-cache/

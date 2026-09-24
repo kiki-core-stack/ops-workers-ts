@@ -190,6 +190,9 @@ Dockerfile
 .gitkeep
 .gitlab-ci.yml
 
+# Local browsers
+.playwright-mcp/
+
 # Other
 .vscode/
 fetch-and-merge.sh
