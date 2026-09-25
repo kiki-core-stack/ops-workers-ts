@@ -1,7 +1,8 @@
+import { closeEmailProviderInstances } from '@kcs-project/pack/providers/email';
+
 import { BullMqWorkerGroup } from '@/libs/bullmq/worker-group';
 import { BaseServiceLifecycle } from '@/service/base-lifecycle';
 
-import { closeEmailProviderInstances } from './providers';
 import { emailSendJobQueue } from './send-job/queue';
 import { createEmailSendJobBullMqWorker } from './send-job/worker';
 import { emailSendRecordReconciler } from './send-record-reconciler';

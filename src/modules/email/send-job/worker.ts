@@ -2,6 +2,9 @@ import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
 import { EmailProviderModel } from '@kcs-project/pack/models/email/provider';
 import type { EmailSendRecord } from '@kcs-project/pack/models/email/send-record';
 import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
+import type { LeanedEmailProvider } from '@kcs-project/pack/providers/email';
+import { getOrCreateEmailProviderInstance } from '@kcs-project/pack/providers/email';
+import { EmailProviderError } from '@kcs-project/pack/providers/email/error';
 import { Worker } from 'bullmq';
 import type { Job } from 'bullmq';
 import type { UpdateQuery } from 'mongoose';
@@ -11,10 +14,6 @@ import { nanoid } from 'nanoid';
 import { createBullMqOptions } from '@/libs/bullmq';
 import { getErrorMessage } from '@/utils/error';
 import type { PrefixedLogger } from '@/utils/logger/prefixed';
-
-import type { LeanedEmailProvider } from '../providers';
-import { getOrCreateEmailProviderInstance } from '../providers';
-import { EmailProviderError } from '../providers/error';
 
 import { emailSendJobQueueName } from './queue';
 import type { EmailSendJobData } from './types';
