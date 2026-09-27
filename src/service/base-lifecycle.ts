@@ -23,6 +23,11 @@ export abstract class BaseServiceLifecycle {
     }
 
     // Private methods
+    #cancelLifecycle() {
+        this.#lifecycleCancellationController.abort(new Error('Service lifecycle cancelled'));
+        this.#lifecycleCancellationPromiseResolvers.resolve();
+    }
+
     async #cleanupResources() {
         this.cleanupErrors.length = 0;
         await this.tryCleanup(() => this.cleanupResources());
@@ -49,6 +54,7 @@ export abstract class BaseServiceLifecycle {
         return this.lifecycleLock.withLock(async () => {
             if (this.#state === ServiceState.Running) return;
             if (this.#state === ServiceState.CleanupFailed) throw new Error('Cannot start after cleanup failed');
+            if (this.lifecycleCancellationSignal.aborted) throw new Error('Cannot start after lifecycle cancellation');
             this.#state = ServiceState.Starting;
             this.logger.info('Starting service');
 
@@ -59,7 +65,7 @@ export abstract class BaseServiceLifecycle {
                 this.#state = ServiceState.Running;
                 this.logger.success('Service started');
             } catch (error) {
-                this.cancelLifecycle();
+                this.#cancelLifecycle();
                 const cleanedUp = await this.#cleanupResources();
                 this.#state = cleanedUp ? ServiceState.Stopped : ServiceState.CleanupFailed;
                 if (!cleanedUp) this.logger.error('Startup rollback failed');
@@ -83,15 +89,10 @@ export abstract class BaseServiceLifecycle {
     }
 
     // Public methods
-    cancelLifecycle() {
-        this.#lifecycleCancellationController.abort(new Error('Service lifecycle cancelled'));
-        this.#lifecycleCancellationPromiseResolvers.resolve();
-    }
-
     abstract start(): Promisable<void>;
 
     stop() {
-        this.cancelLifecycle();
+        this.#cancelLifecycle();
         return this.lifecycleLock.withLock(async () => {
             if (this.#state === ServiceState.Stopped) return true;
             if (this.#state === ServiceState.CleanupFailed) return false;
