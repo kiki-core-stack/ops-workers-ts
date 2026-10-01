@@ -1,6 +1,7 @@
 import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
 import { JobType } from '@kcs-project/pack/constants/job';
 import { SmsSendRecordStatus } from '@kcs-project/pack/constants/sms';
+import { safeParseJobPayload } from '@kcs-project/pack/libs/job';
 import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
 import { JobOutboxEventModel } from '@kcs-project/pack/models/job/outbox-event';
 import type {
@@ -25,12 +26,10 @@ import {
     emailSendJobQueue,
     emailSendJobQueueName,
 } from './email/send-job/queue';
-import type { EmailSendJobData } from './email/send-job/types';
 import {
     smsSendJobQueue,
     smsSendJobQueueName,
 } from './sms/send-job/queue';
-import type { SmsSendJobData } from './sms/send-job/types';
 
 type LeanedJobOutboxEvent = GetLeanResultType<JobOutboxEvent, JobOutboxEventDocument, 'findOne'>;
 
@@ -153,7 +152,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
         });
 
         if (finalized) {
-            this.logger.warn('Job outbox event and related send record finalized', { eventId: outboxEvent._id });
+            this.logger.warn('Job outbox event failure finalized', { eventId: outboxEvent._id });
         } else {
             this.logger.warn(
                 'Job outbox event was not finalized because its claim changed',
@@ -165,10 +164,24 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     async #finalizeOutboxEventTarget(outboxEvent: LeanedJobOutboxEvent, failureReason: string, session: ClientSession) {
         switch (outboxEvent.type) {
             case JobType.SendEmail: {
-                const recordId = new Types.ObjectId(outboxEvent.payload.recordId);
+                const payloadParseResult = safeParseJobPayload(JobType.SendEmail, outboxEvent.payload);
+                if (!payloadParseResult.success) {
+                    // An invalid payload cannot identify a send record safely.
+                    this.logger.error(
+                        'Cannot finalize email send record with invalid outbox payload',
+                        {
+                            error: payloadParseResult.error,
+                            eventId: outboxEvent._id,
+                        },
+                    );
+
+                    return;
+                }
+
+                const recordId = new Types.ObjectId(payloadParseResult.data.recordId);
                 const pendingUpdateResult = await EmailSendRecordModel.updateOne(
                     {
-                        _id: new Types.ObjectId(recordId),
+                        _id: recordId,
                         status: EmailSendRecordStatus.Pending,
                     },
                     {
@@ -211,7 +224,21 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 return;
             }
             case JobType.SendSms: {
-                const recordId = new Types.ObjectId(outboxEvent.payload.recordId);
+                const payloadParseResult = safeParseJobPayload(JobType.SendSms, outboxEvent.payload);
+                if (!payloadParseResult.success) {
+                    // An invalid payload cannot identify a send record safely.
+                    this.logger.error(
+                        'Cannot finalize sms send record with invalid outbox payload',
+                        {
+                            error: payloadParseResult.error,
+                            eventId: outboxEvent._id,
+                        },
+                    );
+
+                    return;
+                }
+
+                const recordId = new Types.ObjectId(payloadParseResult.data.recordId);
                 const pendingUpdateResult = await SmsSendRecordModel.updateOne(
                     {
                         _id: recordId,
@@ -284,7 +311,14 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
 
         switch (outboxEvent.type) {
             case JobType.SendEmail: {
-                const emailSendJobData = outboxEvent.payload as EmailSendJobData;
+                const payloadParseResult = safeParseJobPayload(JobType.SendEmail, outboxEvent.payload);
+                if (!payloadParseResult.success) {
+                    // Retrying cannot repair an invalid payload.
+                    await this.#finalizeOutboxEventFailure(outboxEvent, payloadParseResult.error);
+                    return false;
+                }
+
+                const emailSendJobData = payloadParseResult.data;
                 await emailSendJobQueue.add(
                     emailSendJobQueueName,
                     emailSendJobData,
@@ -294,7 +328,14 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 return true;
             }
             case JobType.SendSms: {
-                const smsSendJobData = outboxEvent.payload as SmsSendJobData;
+                const payloadParseResult = safeParseJobPayload(JobType.SendSms, outboxEvent.payload);
+                if (!payloadParseResult.success) {
+                    // Retrying cannot repair an invalid payload.
+                    await this.#finalizeOutboxEventFailure(outboxEvent, payloadParseResult.error);
+                    return false;
+                }
+
+                const smsSendJobData = payloadParseResult.data;
                 await smsSendJobQueue.add(smsSendJobQueueName, smsSendJobData, { jobId: smsSendJobData.recordId });
                 return true;
             }

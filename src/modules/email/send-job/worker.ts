@@ -1,11 +1,16 @@
 import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
+import { JobType } from '@kcs-project/pack/constants/job';
+import { safeParseJobPayload } from '@kcs-project/pack/libs/job';
 import { EmailProviderModel } from '@kcs-project/pack/models/email/provider';
 import type { EmailSendRecord } from '@kcs-project/pack/models/email/send-record';
 import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
 import type { LeanedEmailProvider } from '@kcs-project/pack/providers/email';
 import { getOrCreateEmailProviderInstance } from '@kcs-project/pack/providers/email';
 import { EmailProviderError } from '@kcs-project/pack/providers/email/error';
-import { Worker } from 'bullmq';
+import {
+    UnrecoverableError,
+    Worker,
+} from 'bullmq';
 import type { Job } from 'bullmq';
 import type { UpdateQuery } from 'mongoose';
 import { Types } from 'mongoose';
@@ -25,10 +30,15 @@ export function createEmailSendJobBullMqWorker(logger: PrefixedLogger) {
     const hasRetryRemaining = (job: EmailSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
 
     async function processSendJob(job: EmailSendJob, signal?: AbortSignal) {
+        const payloadParseResult = safeParseJobPayload(JobType.SendEmail, job.data);
+        if (!payloadParseResult.success) {
+            throw new UnrecoverableError(`Invalid email send job payload: ${payloadParseResult.error.message}`);
+        }
+
         const attemptId = nanoid();
         const emailSendRecord = await EmailSendRecordModel.findOneAndUpdate(
             {
-                _id: new Types.ObjectId(job.data.recordId),
+                _id: new Types.ObjectId(payloadParseResult.data.recordId),
                 status: EmailSendRecordStatus.Pending,
             },
             {

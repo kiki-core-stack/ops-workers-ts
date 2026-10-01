@@ -13,18 +13,20 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#b6738c7c186e2fe092eba9c044a03fa73f0388ae",
-    "@kikiutils/mongoose": "^7.0.3",
+    "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#f983c1954b5468b6de26a59ef5cf397efb288f74",
+    "@kikiutils/mongoose": "^7.1.0",
     "@kikiutils/shared": "^18.0.1",
     "axios": "^1.20.0",
-    "bullmq": "^6.3.4",
+    "bullmq": "^6.3.10",
     "consola": "^3.4.2",
     "date-fns": "^4.4.0",
+    "file-type": "^22.1.1",
     "http-proxy-agent": "^9.1.0",
     "https-proxy-agent": "^9.1.0",
-    "mongoose": "^9.10.0",
+    "lru-cache": "^11.5.3",
+    "mongoose": "^9.10.3",
     "nanoid": "^6.0.1",
-    "nodemailer": "^10.0.9",
+    "nodemailer": "^10.0.13",
     "p-mutex": "^1.0.0"
   },
   "devDependencies": {
@@ -32,9 +34,9 @@
     "@kikiutils/eslint-config": "^9.2.1",
     "@kikiutils/tsconfigs": "^7.0.0",
     "@types/bun": "^1.4.2",
-    "eslint": "^10.10.0",
-    "knip": "^6.35.1",
-    "type-fest": "^5.9.0",
+    "eslint": "^10.11.0",
+    "knip": "^6.39.0",
+    "type-fest": "^5.10.0",
     "typescript": "^6.0.3"
   },
   "overrides": {

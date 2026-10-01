@@ -1,11 +1,16 @@
+import { JobType } from '@kcs-project/pack/constants/job';
 import { SmsSendRecordStatus } from '@kcs-project/pack/constants/sms';
+import { safeParseJobPayload } from '@kcs-project/pack/libs/job';
 import { SmsProviderModel } from '@kcs-project/pack/models/sms/provider';
 import type { SmsSendRecord } from '@kcs-project/pack/models/sms/send-record';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
 import { getOrCreateSmsProviderInstance } from '@kcs-project/pack/providers/sms';
 import type { LeanedSmsProvider } from '@kcs-project/pack/providers/sms';
 import { SmsProviderError } from '@kcs-project/pack/providers/sms/error';
-import { Worker } from 'bullmq';
+import {
+    UnrecoverableError,
+    Worker,
+} from 'bullmq';
 import type { Job } from 'bullmq';
 import type { UpdateQuery } from 'mongoose';
 import { Types } from 'mongoose';
@@ -25,10 +30,15 @@ export function createSmsSendJobBullMqWorker(logger: PrefixedLogger) {
     const hasRetryRemaining = (job: SmsSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
 
     async function processSendJob(job: SmsSendJob, signal?: AbortSignal) {
+        const payloadParseResult = safeParseJobPayload(JobType.SendSms, job.data);
+        if (!payloadParseResult.success) {
+            throw new UnrecoverableError(`Invalid sms send job payload: ${payloadParseResult.error.message}`);
+        }
+
         const attemptId = nanoid();
         const smsSendRecord = await SmsSendRecordModel.findOneAndUpdate(
             {
-                _id: new Types.ObjectId(job.data.recordId),
+                _id: new Types.ObjectId(payloadParseResult.data.recordId),
                 status: SmsSendRecordStatus.Pending,
             },
             {
