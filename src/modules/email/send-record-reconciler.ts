@@ -6,7 +6,7 @@ import type {
     EmailSendRecordDocument,
 } from '@kcs-project/pack/models/email/send-record';
 import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
-import { subMinutes } from 'date-fns';
+import { EnhancedDate } from '@kikiutils/shared/classes/enhanced-date';
 import type { GetLeanResultType } from 'mongoose';
 
 import { BaseServiceLifecycle } from '@/service/base-lifecycle';
@@ -103,7 +103,7 @@ export class EmailSendRecordReconciler extends BaseServiceLifecycle {
         const sendRecords = await EmailSendRecordModel
             .find({
                 status: EmailSendRecordStatus.Processing,
-                updatedAt: { $lt: subMinutes(new Date(), 5) },
+                updatedAt: { $lt: new EnhancedDate().subMinutes(5) },
             })
             .select([
                 '_id',

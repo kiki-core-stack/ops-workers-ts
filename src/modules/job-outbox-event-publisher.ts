@@ -10,7 +10,7 @@ import type {
 } from '@kcs-project/pack/models/job/outbox-event';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
 import { mongooseConnections } from '@kikiutils/mongoose/constants';
-import { addSeconds } from 'date-fns';
+import { EnhancedDate } from '@kikiutils/shared/classes/enhanced-date';
 import type {
     ClientSession,
     GetLeanResultType,
@@ -44,8 +44,8 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
 
     // Private methods
     async #claimNextOutboxEvent() {
-        const now = new Date();
-        const publishLeaseUntil = addSeconds(now, 30);
+        const now = new EnhancedDate();
+        const publishLeaseUntil = now.toAddSeconds(30);
         return await JobOutboxEventModel
             .findOneAndUpdate(
                 {
@@ -90,7 +90,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
             return;
         }
 
-        const nextPublishAt = addSeconds(new Date(), 5);
+        const nextPublishAt = new EnhancedDate().addSeconds(5);
         try {
             const updateResult = await JobOutboxEventModel.updateOne(
                 {
