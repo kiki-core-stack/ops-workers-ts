@@ -51,7 +51,7 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
     }
 
     async #reconcileSendRecord(sendRecord: LeanedSmsSendRecord) {
-        this.lifecycleCancellationSignal.throwIfAborted();
+        if (this.lifecycleCancellationSignal.aborted) return;
 
         const sendRecordId = sendRecord._id.toString();
         const job = await smsSendJobQueue.getJob(sendRecordId);
@@ -88,7 +88,7 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
     }
 
     async #reconcileBatch() {
-        this.lifecycleCancellationSignal.throwIfAborted();
+        if (this.lifecycleCancellationSignal.aborted) return;
 
         const lockResult = await redisClient.set(
             `${projectRedisKeyPrefix}:sms:sendJob:reconciler:lock`,
@@ -119,10 +119,11 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
             .lean();
 
         for (const sendRecord of sendRecords) {
+            if (this.lifecycleCancellationSignal.aborted) return;
             try {
                 await this.#reconcileSendRecord(sendRecord);
             } catch (error) {
-                if (this.lifecycleCancellationSignal.aborted) throw error;
+                if (this.lifecycleCancellationSignal.aborted) return;
                 this.logger.error(
                     'Sms send record reconciliation failed',
                     {
@@ -135,7 +136,7 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
     }
 
     #scheduleReconciliation() {
-        if (this.#reconciliationPromise) return;
+        if (this.#reconciliationPromise || this.lifecycleCancellationSignal.aborted) return;
         this.#reconciliationPromise = this.#reconcileBatch()
             .catch((error) => {
                 if (!this.lifecycleCancellationSignal.aborted) {
