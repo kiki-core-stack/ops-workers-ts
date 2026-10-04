@@ -56,7 +56,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                     nextPublishAt: { $lte: now },
                 },
                 {
-                    $inc: { publishAttempts: 1 },
+                    $inc: { publishAttemptCount: 1 },
                     $set: {
                         publishClaimId: nanoid(),
                         publishLeaseUntil,
@@ -85,7 +85,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     }
 
     async #handlePublishOutboxEventFailure(outboxEvent: LeanedJobOutboxEvent, error: unknown) {
-        if (outboxEvent.publishAttempts >= 10) {
+        if (outboxEvent.publishAttemptCount >= 10) {
             await this.#finalizeOutboxEventFailure(outboxEvent, error);
             return;
         }
@@ -131,7 +131,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
             {
                 error,
                 eventId: outboxEvent._id,
-                publishAttempts: outboxEvent.publishAttempts,
+                publishAttemptCount: outboxEvent.publishAttemptCount,
                 type: outboxEvent.type,
             },
         );
