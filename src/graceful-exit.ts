@@ -1,5 +1,5 @@
 import { redisClient } from '@kcs-project/pack/constants/redis';
-import { mongooseConnections } from '@kikiutils/mongoose/constants';
+import mongoose from 'mongoose';
 
 import { bullMqRedisConnection } from '@/constants/bullmq';
 import { mainModule } from '@/modules/main';
@@ -20,7 +20,7 @@ export async function gracefulExit() {
 
     bullMqRedisConnection.disconnect();
     redisClient.close();
-    await mongooseConnections.default?.close().catch((error) => errors.push(error));
+    await mongoose.disconnect().catch((error) => errors.push(error));
 
     if (!errors.length) logger.success('Graceful shutdown completed');
     else {

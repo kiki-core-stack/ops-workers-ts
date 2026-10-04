@@ -9,7 +9,7 @@ import type {
     JobOutboxEventDocument,
 } from '@kcs-project/pack/models/job/outbox-event';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
-import { mongooseConnections } from '@kikiutils/mongoose/constants';
+import { getDefaultMongooseConnection } from '@kikiutils/mongoose/connection';
 import { EnhancedDate } from '@kikiutils/shared/classes/enhanced-date';
 import type {
     ClientSession,
@@ -136,7 +136,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
             },
         );
 
-        const finalized = await mongooseConnections.default!.transaction(async (session) => {
+        const finalized = await getDefaultMongooseConnection().transaction(async (session) => {
             const deleteResult = await JobOutboxEventModel.deleteOne(
                 {
                     _id: outboxEvent._id,
