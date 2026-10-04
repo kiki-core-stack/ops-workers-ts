@@ -1,7 +1,9 @@
 [install]
 minimumReleaseAge = 86400
 minimumReleaseAgeExcludes = [
+  "@kikiutils/mongoose", # TODO: remove it
+  "@kikiutils/shared", # TODO: remove it
   "@types/bun",
-  "bun-types"
+  "bun-types",
 ]
 telemetry = false
