@@ -418,10 +418,13 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
             // Create change stream
             this.#jobOutboxEventDbChangeStream = JobOutboxEventModel.watch([{ $match: { operationType: 'insert' } }]);
             this.#jobOutboxEventDbChangeStream.on('change', () => this.#wakePublishOutboxEventLoop());
-            this.#jobOutboxEventDbChangeStream.on('error', (error) => {
-                this.logger.error('Job outbox change stream error', error);
-                this.#wakePublishOutboxEventLoop();
-            });
+            this.#jobOutboxEventDbChangeStream.on(
+                'error',
+                (error) => {
+                    this.logger.error('Job outbox change stream error', error);
+                    this.#wakePublishOutboxEventLoop();
+                },
+            );
 
             // Run loop
             this.#publishLoopPromise = this.#runPublishOutboxEventLoop();

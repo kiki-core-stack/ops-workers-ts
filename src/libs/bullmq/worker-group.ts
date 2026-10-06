@@ -24,40 +24,49 @@ export class BullMqWorkerGroup {
         let closeFailed = false;
         let runPromise: Promise<void> | undefined;
 
-        worker.on('error', (error) => {
-            // close() can report cleanup failures through events rather than rejection.
-            if (closing) closeFailed = true;
-            this.#logger.error(
-                'Worker error',
-                {
-                    error,
-                    queue: worker.name,
-                },
-            );
-        });
+        worker.on(
+            'error',
+            (error) => {
+                // close() can report cleanup failures through events rather than rejection.
+                if (closing) closeFailed = true;
+                this.#logger.error(
+                    'Worker error',
+                    {
+                        error,
+                        queue: worker.name,
+                    },
+                );
+            },
+        );
 
-        worker.on('failed', (job, error) => {
-            this.#logger.warn(
-                'Queue job attempt failed',
-                {
-                    attemptsMade: job?.attemptsMade,
-                    error,
-                    jobId: job?.id,
-                    queue: worker.name,
-                },
-            );
-        });
+        worker.on(
+            'failed',
+            (job, error) => {
+                this.#logger.warn(
+                    'Queue job attempt failed',
+                    {
+                        attemptsMade: job?.attemptsMade,
+                        error,
+                        jobId: job?.id,
+                        queue: worker.name,
+                    },
+                );
+            },
+        );
 
-        worker.on('lockRenewalFailed', (jobIds) => {
-            for (const id of jobIds) worker.cancelJob(id, 'Queue lock renewal failed');
-            this.#logger.warn(
-                'Worker lock renewal failed',
-                {
-                    jobIds,
-                    queue: worker.name,
-                },
-            );
-        });
+        worker.on(
+            'lockRenewalFailed',
+            (jobIds) => {
+                for (const id of jobIds) worker.cancelJob(id, 'Queue lock renewal failed');
+                this.#logger.warn(
+                    'Worker lock renewal failed',
+                    {
+                        jobIds,
+                        queue: worker.name,
+                    },
+                );
+            },
+        );
 
         this.#workers.push({
             async close() {
