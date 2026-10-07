@@ -40,6 +40,7 @@
     "typescript": "^6.0.3"
   },
   "overrides": {
+    "@typescript-eslint/eslint-plugin": "8.71.0",
     "typescript": "^6.0.3"
   }
 }
