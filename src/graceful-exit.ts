@@ -2,7 +2,6 @@ import { redisClient } from '@kcs-project/pack/constants/redis';
 import mongoose from 'mongoose';
 
 import { bullMqRedisConnection } from '@/constants/bullmq';
-import { mainModule } from '@/modules/main';
 import * as logger from '@/utils/logger';
 
 // Constants/Variables
@@ -16,7 +15,7 @@ export async function gracefulExit() {
 
     const errors: unknown[] = [];
 
-    if (!await mainModule.stop()) errors.push(new Error('Module cleanup failed'));
+    if (!await (await import('@/modules/main')).mainModule.stop()) errors.push(new Error('Module cleanup failed'));
 
     bullMqRedisConnection.disconnect();
     redisClient.close();

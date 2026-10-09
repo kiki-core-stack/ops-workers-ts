@@ -1,5 +1,4 @@
 import { gracefulExit } from '@/graceful-exit';
-import { mainModule } from '@/modules/main';
 import * as logger from '@/utils/logger';
 
 // Register events and signals
@@ -20,4 +19,4 @@ function handleFatalError(error: unknown) {
 await (await import('@kcs-project/pack/init')).initializeSystemStartup();
 
 // Start main module
-await mainModule.start();
+await (await import('@/modules/main')).mainModule.start();
