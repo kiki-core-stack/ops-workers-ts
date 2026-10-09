@@ -29,7 +29,7 @@ class EmailModule extends BaseServiceLifecycle {
     protected async cleanupResources() {
         await this.tryCleanup(() => emailSendRecordReconciler.stop());
         await this.tryCleanup(() => this.#sendJobWorkerGroup.close());
-        await this.tryCleanup(() => closeEmailProviderInstances());
+        await this.tryCleanup(closeEmailProviderInstances);
         await this.tryCleanup(() => emailSendJobQueue.close());
     }
 

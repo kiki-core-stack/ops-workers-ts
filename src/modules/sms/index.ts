@@ -29,7 +29,7 @@ class SmsModule extends BaseServiceLifecycle {
     protected async cleanupResources() {
         await this.tryCleanup(() => smsSendRecordReconciler.stop());
         await this.tryCleanup(() => this.#sendJobWorkerGroup.close());
-        await this.tryCleanup(() => closeSmsProviderInstances());
+        await this.tryCleanup(closeSmsProviderInstances);
         await this.tryCleanup(() => smsSendJobQueue.close());
     }
 
