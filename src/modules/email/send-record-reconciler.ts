@@ -94,7 +94,7 @@ export class EmailSendRecordReconciler extends BaseServiceLifecycle {
             `${projectRedisKeyPrefix}:email:sendJob:reconciler:lock`,
             '1',
             'EX',
-            '120',
+            '50',
             'NX',
         );
 

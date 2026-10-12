@@ -94,7 +94,7 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
             `${projectRedisKeyPrefix}:sms:sendJob:reconciler:lock`,
             '1',
             'EX',
-            '120',
+            '50',
             'NX',
         );
 
