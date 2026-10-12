@@ -1,4 +1,7 @@
 [install]
+auto = "disable"
+hoist = false
+linker = "isolated"
 minimumReleaseAge = 86400
 minimumReleaseAgeExcludes = [
   "@kikiutils/mongoose", # TODO: remove it
