@@ -1,6 +1,6 @@
-import { redisClient } from '@kcs-project/pack/connections/redis';
 import { projectRedisKeyPrefix } from '@kcs-project/pack/constants';
 import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
+import { tryClaimRedisKey } from '@kcs-project/pack/libs/redis/lock';
 import type {
     EmailSendRecord,
     EmailSendRecordDocument,
@@ -90,15 +90,7 @@ export class EmailSendRecordReconciler extends BaseServiceLifecycle {
     async #reconcileBatch() {
         if (this.lifecycleCancellationSignal.aborted) return;
 
-        const lockResult = await redisClient.set(
-            `${projectRedisKeyPrefix}:email:sendJob:reconciler:lock`,
-            '1',
-            'EX',
-            '50',
-            'NX',
-        );
-
-        if (lockResult !== 'OK') return;
+        if (!await tryClaimRedisKey(`${projectRedisKeyPrefix}:email:sendJob:reconciler:lock`, 50 * 1000)) return;
 
         const sendRecords = await EmailSendRecordModel
             .find({

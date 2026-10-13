@@ -1,6 +1,6 @@
-import { redisClient } from '@kcs-project/pack/connections/redis';
 import { projectRedisKeyPrefix } from '@kcs-project/pack/constants';
 import { SmsSendRecordStatus } from '@kcs-project/pack/constants/sms';
+import { tryClaimRedisKey } from '@kcs-project/pack/libs/redis/lock';
 import type {
     SmsSendRecord,
     SmsSendRecordDocument,
@@ -90,15 +90,7 @@ export class SmsSendRecordReconciler extends BaseServiceLifecycle {
     async #reconcileBatch() {
         if (this.lifecycleCancellationSignal.aborted) return;
 
-        const lockResult = await redisClient.set(
-            `${projectRedisKeyPrefix}:sms:sendJob:reconciler:lock`,
-            '1',
-            'EX',
-            '50',
-            'NX',
-        );
-
-        if (lockResult !== 'OK') return;
+        if (!await tryClaimRedisKey(`${projectRedisKeyPrefix}:sms:sendJob:reconciler:lock`, 50 * 1000)) return;
 
         const sendRecords = await SmsSendRecordModel
             .find({
