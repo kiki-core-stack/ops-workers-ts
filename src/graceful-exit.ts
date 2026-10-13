@@ -1,4 +1,4 @@
-import { redisClient } from '@kcs-project/pack/constants/redis';
+import { redisClient } from '@kcs-project/pack/connections/redis';
 import mongoose from 'mongoose';
 
 import { bullMqRedisConnection } from '@/constants/bullmq';

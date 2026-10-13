@@ -1,6 +1,6 @@
+import { redisClient } from '@kcs-project/pack/connections/redis';
 import { projectRedisKeyPrefix } from '@kcs-project/pack/constants';
 import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
-import { redisClient } from '@kcs-project/pack/constants/redis';
 import type {
     EmailSendRecord,
     EmailSendRecordDocument,

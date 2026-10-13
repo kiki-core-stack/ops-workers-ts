@@ -1,5 +1,5 @@
+import { redisClient } from '@kcs-project/pack/connections/redis';
 import { projectRedisKeyPrefix } from '@kcs-project/pack/constants';
-import { redisClient } from '@kcs-project/pack/constants/redis';
 import { SmsSendRecordStatus } from '@kcs-project/pack/constants/sms';
 import type {
     SmsSendRecord,
