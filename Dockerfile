@@ -3,7 +3,8 @@ FROM oven/bun:slim AS build-stage
 
 ## Upgrade system packages
 RUN apt-get update && \
-    apt-get upgrade -y
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends git openssh-client
 
 ## Configure build-time options and the environment
 ARG NPM_CONFIG_REGISTRY
@@ -38,7 +39,7 @@ RUN \
     ### Upgrade system packages and install runtime dependencies
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends ca-certificates tini tzdata && \
+    apt-get install -y --no-install-recommends ca-certificates git openssh-client tini tzdata && \
     ### Configure the timezone
     ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
     echo "${TZ}" >/etc/timezone && \
