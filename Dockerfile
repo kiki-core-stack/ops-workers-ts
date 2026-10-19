@@ -18,7 +18,7 @@ RUN --mount=id=bun-cache,target=/root/.bun/install/cache,type=cache \
     bun i --frozen-lockfile
 
 ## Copy application sources and build configuration
-COPY ./.env.production.local ./.gitignore ./eslint.config.mjs ./tsconfig.json ./
+COPY ./.env.production.local ./build.ts ./eslint.config.mjs ./.gitignore ./tsconfig.json ./
 COPY ./src ./src
 
 ## Validate and build the application
@@ -59,11 +59,12 @@ CMD ["./docker-entrypoint.sh"]
 ## Configure remaining runtime defaults
 ENV NODE_ENV='production'
 
-## Optionally install runtime packages that provide required executables
-# Replace the placeholder package with the required package name(s) before uncommenting.
-# COPY ./bunfig.toml ./
-# RUN --mount=id=bun-runtime-cache,target=/home/user/.bun/install/cache,type=cache,uid=10001 \
-#     bun add example-package
+## Copy dependency manifests and install production dependencies
+ARG NPM_CONFIG_REGISTRY
+COPY --chown=10001:nogroup ./bun.lock ./bunfig.toml ./package.json ./
+RUN --mount=id=bun-runtime-cache,target=/home/user/.bun/install/cache,type=cache,uid=10001,gid=65534 \
+    NPM_CONFIG_REGISTRY="${NPM_CONFIG_REGISTRY}" \
+    bun i --production --frozen-lockfile
 
 ## Copy the application output and runtime configuration
 COPY --chown=10001:nogroup --from=build-stage /app/dist ./

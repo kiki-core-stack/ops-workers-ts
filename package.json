@@ -2,9 +2,7 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "build": "bun run build:internal --outdir=./dist",
-    "build:internal": "rm -rf ./dist && NODE_ENV=production bun --env-file=./.env.production.local build ./src/index.ts --minify --production --target bun",
-    "compile": "bun run build:internal --compile --outfile ./dist/index",
+    "build": "NODE_ENV=production bun --env-file=./.env.production.local run ./build.ts",
     "dev": "NODE_ENV=development bun --env-file=./.env.development.local --watch run ./src/index.ts",
     "knip:deps": "knip --dependencies",
     "knip:exports": "knip --exports",
@@ -36,11 +34,11 @@
     "@types/bun": "^1.4.3",
     "eslint": "^10.13.0",
     "knip": "^6.41.0",
+    "pretty-bytes": "^7.2.0",
     "type-fest": "^5.10.0",
     "typescript": "^6.0.3"
   },
   "overrides": {
-    "@typescript-eslint/eslint-plugin": "8.71.0",
     "typescript": "^6.0.3"
   }
 }
