@@ -22,10 +22,11 @@ RUN --mount=id=bun-cache,target=/root/.bun/install/cache,type=cache \
 COPY ./.env.production.local ./build.ts ./eslint.config.mjs ./.gitignore ./tsconfig.json ./
 COPY ./src ./src
 
-## Validate and build the application
+## Validate and build the application, then prune development dependencies
 RUN bun run lint && \
     bun run typecheck && \
-    bun run build
+    bun run build && \
+    bun prune --production
 
 # Runtime stage
 FROM oven/bun:slim
@@ -39,7 +40,7 @@ RUN \
     ### Upgrade system packages and install runtime dependencies
     apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends ca-certificates git openssh-client tini tzdata && \
+    apt-get install -y --no-install-recommends ca-certificates tini tzdata && \
     ### Configure the timezone
     ln -snf "/usr/share/zoneinfo/${TZ}" /etc/localtime && \
     echo "${TZ}" >/etc/timezone && \
@@ -60,12 +61,9 @@ CMD ["./docker-entrypoint.sh"]
 ## Configure remaining runtime defaults
 ENV NODE_ENV='production'
 
-## Copy dependency manifests and install production dependencies
-ARG NPM_CONFIG_REGISTRY
-COPY --chown=10001:nogroup ./bun.lock ./bunfig.toml ./package.json ./
-RUN --mount=id=bun-runtime-cache,target=/home/user/.bun/install/cache,type=cache,uid=10001,gid=65534 \
-    NPM_CONFIG_REGISTRY="${NPM_CONFIG_REGISTRY}" \
-    bun i --production --frozen-lockfile
+## Copy package manager configuration, metadata and production dependencies
+COPY --chown=10001:nogroup ./bunfig.toml ./package.json ./
+COPY --chown=10001:nogroup --from=build-stage /app/node_modules ./node_modules
 
 ## Copy the application output and runtime configuration
 COPY --chown=10001:nogroup --from=build-stage /app/dist ./
