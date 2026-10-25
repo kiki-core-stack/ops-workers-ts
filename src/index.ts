@@ -1,5 +1,5 @@
 import { gracefulExit } from '@/graceful-exit';
-import * as logger from '@/utils/logger';
+import { logger } from '@/libs/logger';
 
 // Register events and signals
 process.once('SIGINT', gracefulExit);

@@ -7,6 +7,7 @@ import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
 import { getOrCreateSmsProviderInstance } from '@kcs-project/pack/providers/sms';
 import type { LeanedSmsProvider } from '@kcs-project/pack/providers/sms';
 import { SmsProviderError } from '@kcs-project/pack/providers/sms/error';
+import type { Logger } from '@kikiutils/shared/logger/types';
 import {
     UnrecoverableError,
     Worker,
@@ -18,14 +19,13 @@ import { nanoid } from 'nanoid';
 
 import { createBullMqOptions } from '@/libs/bullmq';
 import { getErrorMessage } from '@/utils/error';
-import type { PrefixedLogger } from '@/utils/logger/prefixed';
 
 import { smsSendJobQueueName } from './queue';
 import type { SmsSendJobData } from './types';
 
 type SmsSendJob = Job<SmsSendJobData, void>;
 
-export function createSmsSendJobBullMqWorker(logger: PrefixedLogger) {
+export function createSmsSendJobBullMqWorker(logger: Logger) {
     // Functions
     const hasRetryRemaining = (job: SmsSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
 

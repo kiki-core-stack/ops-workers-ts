@@ -2,7 +2,7 @@ import { RedisClient } from 'bun';
 
 import { createBunRedisClient } from 'bullmq';
 
-import * as logger from '@/utils/logger';
+import { logger } from '@/libs/logger';
 
 const { REDIS_URL } = process.env;
 export const bullMqRedisConnection = createBunRedisClient(

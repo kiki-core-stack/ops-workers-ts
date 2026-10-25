@@ -2,7 +2,7 @@ import { redisClient } from '@kcs-project/pack/connections/redis';
 import mongoose from 'mongoose';
 
 import { bullMqRedisConnection } from '@/constants/bullmq';
-import * as logger from '@/utils/logger';
+import { logger } from '@/libs/logger';
 
 // Constants/Variables
 let isGracefulExitStarted = false;

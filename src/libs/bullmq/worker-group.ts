@@ -1,6 +1,5 @@
+import type { Logger } from '@kikiutils/shared/logger/types';
 import type { Worker } from 'bullmq';
-
-import type { PrefixedLogger } from '@/utils/logger/prefixed';
 
 interface OwnedWorker {
     close: () => Promise<boolean>;
@@ -10,11 +9,11 @@ interface OwnedWorker {
 
 // Resource ownership only. BullMQ still owns fetching, locks, retries and stalled recovery.
 export class BullMqWorkerGroup {
-    readonly #logger: PrefixedLogger;
+    readonly #logger: Logger;
     readonly #workers: OwnedWorker[] = [];
     #closePromise?: Promise<boolean>;
 
-    constructor(logger: PrefixedLogger) {
+    constructor(logger: Logger) {
         this.#logger = logger;
     }
 

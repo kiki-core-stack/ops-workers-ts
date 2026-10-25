@@ -7,6 +7,7 @@ import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record
 import type { LeanedEmailProvider } from '@kcs-project/pack/providers/email';
 import { getOrCreateEmailProviderInstance } from '@kcs-project/pack/providers/email';
 import { EmailProviderError } from '@kcs-project/pack/providers/email/error';
+import type { Logger } from '@kikiutils/shared/logger/types';
 import {
     UnrecoverableError,
     Worker,
@@ -18,14 +19,13 @@ import { nanoid } from 'nanoid';
 
 import { createBullMqOptions } from '@/libs/bullmq';
 import { getErrorMessage } from '@/utils/error';
-import type { PrefixedLogger } from '@/utils/logger/prefixed';
 
 import { emailSendJobQueueName } from './queue';
 import type { EmailSendJobData } from './types';
 
 type EmailSendJob = Job<EmailSendJobData, void>;
 
-export function createEmailSendJobBullMqWorker(logger: PrefixedLogger) {
+export function createEmailSendJobBullMqWorker(logger: Logger) {
     // Functions
     const hasRetryRemaining = (job: EmailSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
 

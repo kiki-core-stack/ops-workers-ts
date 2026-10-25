@@ -1,8 +1,8 @@
+import { createLogger } from '@kikiutils/shared/logger';
+import type { Logger } from '@kikiutils/shared/logger/types';
 import { delay } from '@kikiutils/shared/time';
 import Mutex from 'p-mutex';
 import type { Promisable } from 'type-fest';
-
-import { PrefixedLogger } from '@/utils/logger/prefixed';
 
 import { ServiceState } from './state';
 
@@ -16,10 +16,10 @@ export abstract class BaseServiceLifecycle {
     protected readonly cleanupErrors: unknown[] = [];
     protected readonly lifecycleLock = new Mutex();
 
-    readonly logger: PrefixedLogger;
+    readonly logger: Logger;
 
     constructor(loggerPrefix: string) {
-        this.logger = new PrefixedLogger(loggerPrefix);
+        this.logger = createLogger({ prefix: loggerPrefix });
     }
 
     // Private methods
