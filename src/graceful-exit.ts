@@ -1,29 +1,52 @@
 import { redisClient } from '@kcs-project/pack/connections/redis';
+import { withTimeout } from 'es-toolkit/promise';
 import mongoose from 'mongoose';
 
 import { bullMqRedisConnection } from '@/constants/bullmq';
 import { logger } from '@/libs/logger';
 
 // Constants/Variables
-let isGracefulExitStarted = false;
+let shutdownPromise: Promise<void> | undefined;
 
 // Functions
-export async function gracefulExit() {
-    if (isGracefulExitStarted) return;
-    isGracefulExitStarted = true;
-    logger.info('Starting graceful shutdown...');
+export const isShuttingDown = () => !!shutdownPromise;
 
-    const errors: unknown[] = [];
+export function gracefulExit() {
+    return shutdownPromise ??= Promise
+        .resolve()
+        .then(async () => {
+            const timeoutController = new AbortController();
+            logger.info('Starting graceful shutdown...');
 
-    if (!await (await import('@/modules/main')).mainModule.stop()) errors.push(new Error('Module cleanup failed'));
+            try {
+                await withTimeout(
+                    async () => {
+                        const errors: unknown[] = [];
 
-    bullMqRedisConnection.disconnect();
-    redisClient.close();
-    await mongoose.disconnect().catch((error) => errors.push(error));
+                        try {
+                            const { mainModule } = await import('@/modules/main');
+                            if (!await mainModule.stop()) errors.push(new Error('Module cleanup failed'));
+                        } catch (error) {
+                            errors.push(error);
+                        }
 
-    if (!errors.length) logger.success('Graceful shutdown completed');
-    else {
-        process.exitCode = 1;
-        logger.error('Graceful shutdown failed', new AggregateError(errors, 'Graceful shutdown failed'));
-    }
+                        bullMqRedisConnection.disconnect();
+                        redisClient.close();
+                        await mongoose.disconnect().catch((error) => errors.push(error));
+
+                        if (errors.length) throw new AggregateError(errors, 'Resource cleanup failed');
+                    },
+                    30 * 1000,
+                    { signal: timeoutController.signal },
+                );
+            } finally {
+                timeoutController.abort();
+            }
+
+            logger.success('Graceful shutdown completed');
+        })
+        .catch((error) => {
+            logger.error('Graceful shutdown failed', error);
+            process.exit(1);
+        });
 }
