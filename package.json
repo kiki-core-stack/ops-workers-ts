@@ -11,17 +11,14 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#b23dae8cb0fb9bf08dba746b28ff20446b35b98f",
+    "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#47c5e3cdfe88539ae71a4455daf721ac596cee6a",
     "@kikiutils/mongoose": "^9.0.1",
     "@kikiutils/shared": "^19.0.0",
     "axios": "^1.20.0",
     "bullmq": "^6.4.2",
-    "date-fns": "^4.4.0",
     "es-toolkit": "^1.53.0",
-    "file-type": "^22.2.0",
     "http-proxy-agent": "^9.1.0",
     "https-proxy-agent": "^9.1.0",
-    "lru-cache": "^11.5.3",
     "mongoose": "^9.11.4",
     "nanoid": "^6.0.2",
     "nodemailer": "^10.2.1",
