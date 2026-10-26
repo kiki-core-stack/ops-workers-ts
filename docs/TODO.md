@@ -1,2 +1,2 @@
-- Outbox event 的傳遞與消費改採 MongoDB CDC／Kafka；實作時不考慮任何舊資料，視為全新架構重新編寫。
-- sms的provider classes移動到pack, 新增獲取餘額或點數方法，串上mabk與af
+- Outbox event 傳遞改採 MongoDB Outbox → CDC → Kafka → BullMQ → Worker；CDC／Kafka 取代目前自行掃描、claim 與發布 Outbox 的流程，保留 BullMQ 負責工作排隊、執行、重試、延遲與排程；實作時不考慮任何舊資料，視為全新架構重新編寫。
+- sms的provider classes新增獲取餘額或點數方法，串上mabk與af(餘額或點數之類的?)
