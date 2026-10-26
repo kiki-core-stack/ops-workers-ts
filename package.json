@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "NODE_ENV=production bun --env-file=./.env.production.local run ./build.ts",
-    "dev": "NODE_ENV=development bun --env-file=./.env.development.local --watch run ./src/index.ts",
+    "dev": "NODE_ENV=development nodemon",
     "knip:deps": "knip --dependencies",
     "knip:exports": "knip --exports",
     "lint": "eslint --max-warnings 0",
@@ -15,7 +15,7 @@
     "@kikiutils/mongoose": "^9.0.1",
     "@kikiutils/shared": "^19.0.0",
     "axios": "^1.20.0",
-    "bullmq": "^6.4.0",
+    "bullmq": "^6.4.2",
     "date-fns": "^4.4.0",
     "file-type": "^22.2.0",
     "http-proxy-agent": "^9.1.0",
@@ -28,11 +28,12 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^10.0.0",
-    "@kikiutils/eslint-config": "^9.3.1",
+    "@kikiutils/eslint-config": "^9.3.2",
     "@kikiutils/tsconfigs": "^7.0.0",
     "@types/bun": "^1.4.4",
     "eslint": "^10.13.0",
     "knip": "^6.43.0",
+    "nodemon": "^3.1.14",
     "pretty-bytes": "^7.2.0",
     "type-fest": "^5.10.0",
     "typescript": "^6.0.3"

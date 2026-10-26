@@ -1,0 +1,7 @@
+{
+  "delay": 250,
+  "exec": "bun --env-file=./.env.development.local run ./src/index.ts",
+  "ext": "*.js,*.mjs,*.cjs,*.ts",
+  "ignore": [],
+  "watch": "./src"
+}
