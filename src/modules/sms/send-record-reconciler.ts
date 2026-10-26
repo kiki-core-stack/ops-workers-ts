@@ -15,7 +15,7 @@ import { smsSendJobQueue } from './send-job/queue';
 
 type LeanedSmsSendRecord = GetLeanResultType<SmsSendRecord, SmsSendRecordDocument, 'findOne'>;
 
-export class SmsSendRecordReconciler extends BaseServiceLifecycle {
+class SmsSendRecordReconciler extends BaseServiceLifecycle {
     #reconciliationCronJob?: Bun.CronJob;
     #reconciliationPromise?: Promise<void>;
 

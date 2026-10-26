@@ -15,7 +15,7 @@ import { emailSendJobQueue } from './send-job/queue';
 
 type LeanedEmailSendRecord = GetLeanResultType<EmailSendRecord, EmailSendRecordDocument, 'findOne'>;
 
-export class EmailSendRecordReconciler extends BaseServiceLifecycle {
+class EmailSendRecordReconciler extends BaseServiceLifecycle {
     #reconciliationCronJob?: Bun.CronJob;
     #reconciliationPromise?: Promise<void>;
 
