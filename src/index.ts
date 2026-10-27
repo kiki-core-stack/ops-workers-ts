@@ -5,6 +5,10 @@ import {
     gracefulExit,
     isShuttingDown,
 } from '@/graceful-exit';
+import type { MainModule } from '@/modules/main';
+
+// Constants/Variables
+let mainModule: MainModule | undefined;
 
 // Functions
 function handleFatalError(error: unknown) {
@@ -16,9 +20,9 @@ function handleFatalError(error: unknown) {
 }
 
 // Register events and signals
-process.once('SIGINT', gracefulExit);
-process.once('SIGTERM', gracefulExit);
-process.once('SIGUSR2', gracefulExit);
+process.once('SIGINT', () => gracefulExit(mainModule));
+process.once('SIGTERM', () => gracefulExit(mainModule));
+process.once('SIGUSR2', () => gracefulExit(mainModule));
 process.once('uncaughtException', handleFatalError);
 process.once('unhandledRejection', handleFatalError);
 
@@ -28,5 +32,7 @@ process.once('unhandledRejection', handleFatalError);
 await (await import('@kcs-project/pack/init')).initializeSystemStartup();
 
 // Start main module
-const { mainModule } = await import('@/modules/main');
-if (!isShuttingDown()) await mainModule.start();
+if (!isShuttingDown()) {
+    mainModule = (await import('@/modules/main')).mainModule;
+    if (!isShuttingDown()) await mainModule.start();
+}

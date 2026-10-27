@@ -4,7 +4,7 @@ import { emailModule } from './email';
 import { jobOutboxEventPublisherModule } from './job-outbox-event-publisher';
 import { smsModule } from './sms';
 
-class MainModule extends BaseServiceLifecycle {
+export class MainModule extends BaseServiceLifecycle {
     readonly #startedModules: BaseServiceLifecycle[] = [];
 
     constructor() {
