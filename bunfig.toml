@@ -1,3 +1,5 @@
+telemetry = false
+
 [install]
 auto = "disable"
 hoist = false
@@ -10,4 +12,3 @@ minimumReleaseAgeExcludes = [
   "@kikiutils/eslint-config", # TODO: remove it
   "@kikiutils/shared", # TODO: remove it
 ]
-telemetry = false
