@@ -146,8 +146,8 @@ class EmailSendRecordReconciler extends BaseServiceLifecycle {
     }
 
     // Public methods
-    start() {
-        return this.executeStart(() => {
+    async start() {
+        return await this.executeStart(() => {
             this.#reconciliationCronJob = Bun.cron('* * * * *', () => this.#scheduleReconciliation());
         });
     }

@@ -43,10 +43,10 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     }
 
     // Private methods
-    #claimNextOutboxEvent() {
+    async #claimNextOutboxEvent() {
         const now = new EnhancedDate();
         const publishLeaseUntil = now.toAddSeconds(30);
-        return JobOutboxEventModel
+        return await JobOutboxEventModel
             .findOneAndUpdate(
                 {
                     $or: [
@@ -372,7 +372,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
         this.#wakePublishOutboxEventLoopResolver?.();
     }
 
-    #waitForPublishOutboxEventLoopWakeup() {
+    async #waitForPublishOutboxEventLoopWakeup() {
         const signal = this.lifecycleCancellationSignal;
         signal.throwIfAborted();
         const promiseResolvers = Promise.withResolvers<void>();
@@ -401,21 +401,21 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
         signal.addEventListener('abort', onAbort, { once: true });
         if (signal.aborted) onAbort();
 
-        return promiseResolvers.promise;
+        return await promiseResolvers.promise;
     }
 
     // Protected methods
     protected async cleanupResources() {
-        await this.tryCleanup(() => this.#publishLoopPromise);
+        await this.tryCleanup(async () => await this.#publishLoopPromise);
         this.#publishLoopPromise = undefined;
 
-        await this.tryCleanup(() => this.#jobOutboxEventDbChangeStream?.close());
+        await this.tryCleanup(async () => await this.#jobOutboxEventDbChangeStream?.close());
         this.#jobOutboxEventDbChangeStream = undefined;
     }
 
     // Public methods
-    start() {
-        return this.executeStart(() => {
+    async start() {
+        return await this.executeStart(() => {
             // Create change stream
             this.#jobOutboxEventDbChangeStream = JobOutboxEventModel.watch([{ $match: { operationType: 'insert' } }]);
             this.#jobOutboxEventDbChangeStream.on('change', () => this.#wakePublishOutboxEventLoop());

@@ -150,7 +150,7 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
 
     return new Worker<SmsSendJobData, void>(
         smsSendJobQueueName,
-        (job, _token, signal) => processSendJob(job, signal),
+        async (job, _token, signal) => await processSendJob(job, signal),
         {
             autorun: false,
             concurrency: Math.abs(Number(process.env.SMS_SEND_JOB_WORKER_CONCURRENCY)) || 4,

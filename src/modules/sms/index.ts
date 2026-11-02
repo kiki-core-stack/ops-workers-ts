@@ -27,15 +27,15 @@ class SmsModule extends BaseServiceLifecycle {
 
     // Protected methods
     protected async cleanupResources() {
-        await this.tryCleanup(() => smsSendRecordReconciler.stop());
-        await this.tryCleanup(() => this.#sendJobWorkerGroup.close());
+        await this.tryCleanup(async () => await smsSendRecordReconciler.stop());
+        await this.tryCleanup(async () => await this.#sendJobWorkerGroup.close());
         await this.tryCleanup(closeSmsProviderInstances);
-        await this.tryCleanup(() => smsSendJobQueue.close());
+        await this.tryCleanup(async () => await smsSendJobQueue.close());
     }
 
     // Public methods
-    start() {
-        return this.executeStart(async () => {
+    async start() {
+        return await this.executeStart(async () => {
             await smsSendRecordReconciler.start();
             await this.#setupSendJobQueueAndWorker();
 

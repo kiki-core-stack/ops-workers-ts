@@ -25,13 +25,16 @@ export class MainModule extends BaseServiceLifecycle {
 
     // Protected methods
     protected async cleanupResources() {
-        for (const module of [...this.#startedModules].reverse()) await this.tryCleanup(() => module.stop());
+        for (const module of [...this.#startedModules].reverse()) {
+            await this.tryCleanup(async () => await module.stop());
+        }
+
         this.#startedModules.length = 0;
     }
 
     // Public methods
-    start() {
-        return this.executeStart(async () => {
+    async start() {
+        return await this.executeStart(async () => {
             await this.#startChildModule(emailModule);
             await this.#startChildModule(smsModule);
             await this.#startChildModule(jobOutboxEventPublisherModule);

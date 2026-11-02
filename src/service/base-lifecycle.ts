@@ -46,12 +46,12 @@ export abstract class BaseServiceLifecycle {
     // Protected methods
     protected abstract cleanupResources(): Promisable<void>;
 
-    protected delayWithLifecycleCancellation(ms: number) {
-        return delay(ms, this.lifecycleCancellationSignal);
+    protected async delayWithLifecycleCancellation(ms: number) {
+        return await delay(ms, this.lifecycleCancellationSignal);
     }
 
-    protected executeStart(task: () => Promisable<void>) {
-        return this.lifecycleLock.withLock(async () => {
+    protected async executeStart(task: () => Promisable<void>) {
+        return await this.lifecycleLock.withLock(async () => {
             if (this.#state === ServiceState.Running) return;
             if (this.#state === ServiceState.CleanupFailed) throw new Error('Cannot start after cleanup failed');
             if (this.lifecycleCancellationSignal.aborted) throw new Error('Cannot start after lifecycle cancellation');
@@ -91,9 +91,9 @@ export abstract class BaseServiceLifecycle {
     // Public methods
     abstract start(): Promisable<void>;
 
-    stop() {
+    async stop() {
         this.#cancelLifecycle();
-        return this.lifecycleLock.withLock(async () => {
+        return await this.lifecycleLock.withLock(async () => {
             if (this.#state === ServiceState.Stopped) return true;
             if (this.#state === ServiceState.CleanupFailed) return false;
             this.#state = ServiceState.Stopping;

@@ -12,8 +12,8 @@ let shutdownPromise: Promise<void> | undefined;
 // Functions
 export const isShuttingDown = () => !!shutdownPromise;
 
-export function gracefulExit(mainModule?: MainModule) {
-    return shutdownPromise ??= Promise
+export async function gracefulExit(mainModule?: MainModule) {
+    return await (shutdownPromise ??= Promise
         .resolve()
         .then(async () => {
             const timeoutController = new AbortController();
@@ -50,5 +50,5 @@ export function gracefulExit(mainModule?: MainModule) {
         .catch((error) => {
             logger.error('Graceful shutdown failed', error);
             process.exit(1);
-        });
+        }));
 }

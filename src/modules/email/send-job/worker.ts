@@ -150,7 +150,7 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
 
     return new Worker<EmailSendJobData, void>(
         emailSendJobQueueName,
-        (job, _token, signal) => processSendJob(job, signal),
+        async (job, _token, signal) => await processSendJob(job, signal),
         {
             autorun: false,
             concurrency: Math.abs(Number(process.env.EMAIL_SEND_JOB_WORKER_CONCURRENCY)) || 4,

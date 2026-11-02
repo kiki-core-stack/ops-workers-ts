@@ -75,7 +75,7 @@ export class BullMqWorkerGroup {
                 await runPromise;
                 return !closeFailed;
             },
-            ready: () => worker.waitUntilReady(),
+            ready: async () => await worker.waitUntilReady(),
             run: () => {
                 runPromise = worker.run().then(
                     () => {
@@ -112,16 +112,16 @@ export class BullMqWorkerGroup {
         return worker;
     }
 
-    close() {
-        return this.#closePromise ??= (async () => {
-            const results = await Promise.allSettled(this.#workers.map((worker) => worker.close()));
+    async close() {
+        return await (this.#closePromise ??= (async () => {
+            const results = await Promise.allSettled(this.#workers.map(async (worker) => await worker.close()));
             this.#workers.length = 0;
             for (const result of results) {
                 if (result.status === 'rejected') this.#logger.error('Worker cleanup failed', result.reason);
             }
 
             return results.every((result) => result.status === 'fulfilled' && result.value);
-        })();
+        })());
     }
 
     async start(lifecycleCancellationSignal: AbortSignal) {
@@ -129,7 +129,7 @@ export class BullMqWorkerGroup {
         lifecycleCancellationSignal.addEventListener('abort', cancelLifecycleReadiness, { once: true });
         try {
             lifecycleCancellationSignal.throwIfAborted();
-            await Promise.all(this.#workers.map((worker) => worker.ready()));
+            await Promise.all(this.#workers.map(async (worker) => await worker.ready()));
             lifecycleCancellationSignal.throwIfAborted();
             for (const worker of this.#workers) worker.run();
         } finally {
