@@ -30,4 +30,4 @@ export const smsSendJobQueue = new Queue<SmsSendJobData, void, typeof smsSendJob
     },
 );
 
-smsSendJobQueue.on('error', (error) => smsModule.logger.error('send job queue error:', error));
+smsSendJobQueue.on('error', (error) => void smsModule.logger.error('send job queue error:', error));

@@ -53,7 +53,6 @@ export async function runBuild(options: BuildOptions = {}) {
         'Outputs (dist/):',
         ...outputLines,
         '',
-        // eslint-disable-next-line style/max-len
         `Total output: ${outputs.length} ${outputs.length === 1 ? 'file' : 'files'}, ${prettyBytes(totalOutputSizeBytes)}`,
         '',
     ].join('\n'));

@@ -103,6 +103,7 @@ export abstract class BaseServiceLifecycle {
             this.#state = succeeded ? ServiceState.Stopped : ServiceState.CleanupFailed;
             if (succeeded) this.logger.success('Service stopped');
             else this.logger.error('Service cleanup failed');
+
             return succeeded;
         });
     }

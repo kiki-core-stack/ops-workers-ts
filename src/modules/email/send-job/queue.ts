@@ -30,4 +30,4 @@ export const emailSendJobQueue = new Queue<EmailSendJobData, void, typeof emailS
     },
 );
 
-emailSendJobQueue.on('error', (error) => emailModule.logger.error('send job queue error:', error));
+emailSendJobQueue.on('error', (error) => void emailModule.logger.error('send job queue error:', error));

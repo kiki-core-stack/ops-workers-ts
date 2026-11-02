@@ -13,7 +13,7 @@ export class MainModule extends BaseServiceLifecycle {
 
     // Private methods
     async #startChildModule(childModule: BaseServiceLifecycle) {
-        const cancelModuleLifecycle = () => childModule.stop();
+        const cancelModuleLifecycle = () => void childModule.stop();
         this.lifecycleCancellationSignal.addEventListener('abort', cancelModuleLifecycle, { once: true });
         try {
             await childModule.start();

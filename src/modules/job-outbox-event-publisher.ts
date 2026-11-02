@@ -43,10 +43,10 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     }
 
     // Private methods
-    async #claimNextOutboxEvent() {
+    #claimNextOutboxEvent() {
         const now = new EnhancedDate();
         const publishLeaseUntil = now.toAddSeconds(30);
-        return await JobOutboxEventModel
+        return JobOutboxEventModel
             .findOneAndUpdate(
                 {
                     $or: [
@@ -70,7 +70,8 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 _id: 1,
                 /* eslint-enable perfectionist/sort-objects */
             })
-            .lean();
+            .lean()
+            .exec();
     }
 
     async #deletePublishedOutboxEvent(outboxEvent: LeanedJobOutboxEvent) {

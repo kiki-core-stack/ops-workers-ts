@@ -125,7 +125,7 @@ export class BullMqWorkerGroup {
     }
 
     async start(lifecycleCancellationSignal: AbortSignal) {
-        const cancelLifecycleReadiness = () => this.close();
+        const cancelLifecycleReadiness = () => void this.close();
         lifecycleCancellationSignal.addEventListener('abort', cancelLifecycleReadiness, { once: true });
         try {
             lifecycleCancellationSignal.throwIfAborted();

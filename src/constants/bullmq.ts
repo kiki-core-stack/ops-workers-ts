@@ -16,4 +16,4 @@ export const bullMqRedisConnection = createBunRedisClient(
     { lazyConnect: true },
 );
 
-bullMqRedisConnection.on('error', (error) => logger.error('BullMQ redis connection error:', error));
+bullMqRedisConnection.on('error', (error) => void logger.error('BullMQ redis connection error:', error));
