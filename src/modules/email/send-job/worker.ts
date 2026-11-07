@@ -1,12 +1,12 @@
 import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
 import { JobType } from '@kcs-project/pack/constants/job';
-import { safeParseJobPayload } from '@kcs-project/pack/libs/job';
 import { EmailProviderModel } from '@kcs-project/pack/models/email/provider';
 import type { EmailSendRecord } from '@kcs-project/pack/models/email/send-record';
 import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
 import type { LeanedEmailProvider } from '@kcs-project/pack/providers/email';
 import { getOrCreateEmailProviderInstance } from '@kcs-project/pack/providers/email';
 import { EmailProviderError } from '@kcs-project/pack/providers/email/error';
+import { safeParseJobOutboxEventPayload } from '@kcs-project/pack/schemas/job';
 import type { Logger } from '@kikiutils/shared/logger/types';
 import {
     UnrecoverableError,
@@ -30,7 +30,7 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
     const hasRetryRemaining = (job: EmailSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
 
     async function processSendJob(job: EmailSendJob, signal?: AbortSignal) {
-        const payloadParseResult = safeParseJobPayload(JobType.SendEmail, job.data);
+        const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendEmail, job.data);
         if (!payloadParseResult.success) {
             throw new UnrecoverableError(`Invalid email send job payload: ${payloadParseResult.error.message}`);
         }

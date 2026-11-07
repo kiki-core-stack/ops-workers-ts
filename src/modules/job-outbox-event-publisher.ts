@@ -1,7 +1,6 @@
 import { EmailSendRecordStatus } from '@kcs-project/pack/constants/email';
 import { JobType } from '@kcs-project/pack/constants/job';
 import { SmsSendRecordStatus } from '@kcs-project/pack/constants/sms';
-import { safeParseJobPayload } from '@kcs-project/pack/libs/job';
 import { EmailSendRecordModel } from '@kcs-project/pack/models/email/send-record';
 import { JobOutboxEventModel } from '@kcs-project/pack/models/job/outbox-event';
 import type {
@@ -9,6 +8,7 @@ import type {
     JobOutboxEventDocument,
 } from '@kcs-project/pack/models/job/outbox-event';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
+import { safeParseJobOutboxEventPayload } from '@kcs-project/pack/schemas/job';
 import { getDefaultMongooseConnection } from '@kikiutils/mongoose/connection';
 import { EnhancedDate } from '@kikiutils/shared/classes/enhanced-date';
 import type {
@@ -165,7 +165,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     async #finalizeOutboxEventTarget(outboxEvent: LeanedJobOutboxEvent, failureReason: string, session: ClientSession) {
         switch (outboxEvent.type) {
             case JobType.SendEmail: {
-                const payloadParseResult = safeParseJobPayload(JobType.SendEmail, outboxEvent.payload);
+                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendEmail, outboxEvent.payload);
                 if (!payloadParseResult.success) {
                     // An invalid payload cannot identify a send record safely.
                     this.logger.error(
@@ -225,7 +225,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 return;
             }
             case JobType.SendSms: {
-                const payloadParseResult = safeParseJobPayload(JobType.SendSms, outboxEvent.payload);
+                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendSms, outboxEvent.payload);
                 if (!payloadParseResult.success) {
                     // An invalid payload cannot identify a send record safely.
                     this.logger.error(
@@ -281,17 +281,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                         },
                     );
                 }
-
-                return;
             }
-            default:
-                this.logger.warn(
-                    'Unsupported job outbox event type has no outbox event target handler',
-                    {
-                        eventId: outboxEvent._id,
-                        type: outboxEvent.type,
-                    },
-                );
         }
     }
 
@@ -312,7 +302,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
 
         switch (outboxEvent.type) {
             case JobType.SendEmail: {
-                const payloadParseResult = safeParseJobPayload(JobType.SendEmail, outboxEvent.payload);
+                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendEmail, outboxEvent.payload);
                 if (!payloadParseResult.success) {
                     // Retrying cannot repair an invalid payload.
                     await this.#finalizeOutboxEventFailure(outboxEvent, payloadParseResult.error);
@@ -329,7 +319,7 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 return true;
             }
             case JobType.SendSms: {
-                const payloadParseResult = safeParseJobPayload(JobType.SendSms, outboxEvent.payload);
+                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendSms, outboxEvent.payload);
                 if (!payloadParseResult.success) {
                     // Retrying cannot repair an invalid payload.
                     await this.#finalizeOutboxEventFailure(outboxEvent, payloadParseResult.error);
@@ -340,13 +330,6 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 await smsSendJobQueue.add(smsSendJobQueueName, smsSendJobData, { jobId: smsSendJobData.recordId });
                 return true;
             }
-            default:
-                await this.#finalizeOutboxEventFailure(
-                    outboxEvent,
-                    new Error(`Unsupported job outbox event type: ${outboxEvent.type}`),
-                );
-
-                return false;
         }
     }
 

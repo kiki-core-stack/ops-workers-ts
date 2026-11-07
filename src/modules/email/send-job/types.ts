@@ -1,4 +1,4 @@
 import type { JobType } from '@kcs-project/pack/constants/job';
-import type { JobPayloadByType } from '@kcs-project/pack/types/job';
+import type { JobOutboxEventPayloadByType } from '@kcs-project/pack/types/job';
 
-export type EmailSendJobData = JobPayloadByType[JobType.SendEmail];
+export type EmailSendJobData = JobOutboxEventPayloadByType[JobType.SendEmail];

@@ -1,12 +1,12 @@
 import { JobType } from '@kcs-project/pack/constants/job';
 import { SmsSendRecordStatus } from '@kcs-project/pack/constants/sms';
-import { safeParseJobPayload } from '@kcs-project/pack/libs/job';
 import { SmsProviderModel } from '@kcs-project/pack/models/sms/provider';
 import type { SmsSendRecord } from '@kcs-project/pack/models/sms/send-record';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
 import { getOrCreateSmsProviderInstance } from '@kcs-project/pack/providers/sms';
 import type { LeanedSmsProvider } from '@kcs-project/pack/providers/sms';
 import { SmsProviderError } from '@kcs-project/pack/providers/sms/error';
+import { safeParseJobOutboxEventPayload } from '@kcs-project/pack/schemas/job';
 import type { Logger } from '@kikiutils/shared/logger/types';
 import {
     UnrecoverableError,
@@ -30,7 +30,7 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
     const hasRetryRemaining = (job: SmsSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
 
     async function processSendJob(job: SmsSendJob, signal?: AbortSignal) {
-        const payloadParseResult = safeParseJobPayload(JobType.SendSms, job.data);
+        const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendSms, job.data);
         if (!payloadParseResult.success) {
             throw new UnrecoverableError(`Invalid sms send job payload: ${payloadParseResult.error.message}`);
         }
