@@ -7,6 +7,7 @@ import { getOrCreateSmsProviderInstance } from '@kcs-project/pack/providers/sms'
 import type { LeanedSmsProvider } from '@kcs-project/pack/providers/sms';
 import { SmsProviderError } from '@kcs-project/pack/providers/sms/error';
 import { jobOutboxEventPayloadVariants } from '@kcs-project/pack/schemas/job';
+import { getErrorMessage } from '@kcs-project/pack/utils/error';
 import type { Logger } from '@kikiutils/shared/logger/types';
 import {
     UnrecoverableError,
@@ -18,7 +19,6 @@ import { Types } from 'mongoose';
 import { nanoid } from 'nanoid';
 
 import { createBullMqOptions } from '@/libs/bullmq';
-import { getErrorMessage } from '@/utils/error';
 
 import { smsSendJobQueueName } from './queue';
 import type { SmsSendJobData } from './types';

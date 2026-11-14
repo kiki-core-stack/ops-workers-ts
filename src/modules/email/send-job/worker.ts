@@ -7,6 +7,7 @@ import type { LeanedEmailProvider } from '@kcs-project/pack/providers/email';
 import { getOrCreateEmailProviderInstance } from '@kcs-project/pack/providers/email';
 import { EmailProviderError } from '@kcs-project/pack/providers/email/error';
 import { jobOutboxEventPayloadVariants } from '@kcs-project/pack/schemas/job';
+import { getErrorMessage } from '@kcs-project/pack/utils/error';
 import type { Logger } from '@kikiutils/shared/logger/types';
 import {
     UnrecoverableError,
@@ -18,7 +19,6 @@ import { Types } from 'mongoose';
 import { nanoid } from 'nanoid';
 
 import { createBullMqOptions } from '@/libs/bullmq';
-import { getErrorMessage } from '@/utils/error';
 
 import { emailSendJobQueueName } from './queue';
 import type { EmailSendJobData } from './types';

@@ -9,6 +9,7 @@ import type {
 } from '@kcs-project/pack/models/job/outbox-event';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
 import { jobOutboxEventPayloadVariants } from '@kcs-project/pack/schemas/job';
+import { getErrorMessage } from '@kcs-project/pack/utils/error';
 import { getDefaultMongooseConnection } from '@kikiutils/mongoose/connection';
 import { EnhancedDate } from '@kikiutils/shared/classes/enhanced-date';
 import type {
@@ -20,7 +21,6 @@ import { Types } from 'mongoose';
 import { nanoid } from 'nanoid';
 
 import { BaseServiceLifecycle } from '@/service/base-lifecycle';
-import { getErrorMessage } from '@/utils/error';
 
 import {
     emailSendJobQueue,
