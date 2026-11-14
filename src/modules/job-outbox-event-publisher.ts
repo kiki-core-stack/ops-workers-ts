@@ -8,7 +8,7 @@ import type {
     JobOutboxEventDocument,
 } from '@kcs-project/pack/models/job/outbox-event';
 import { SmsSendRecordModel } from '@kcs-project/pack/models/sms/send-record';
-import { safeParseJobOutboxEventPayload } from '@kcs-project/pack/schemas/job';
+import { jobOutboxEventPayloadVariants } from '@kcs-project/pack/schemas/job';
 import { getDefaultMongooseConnection } from '@kikiutils/mongoose/connection';
 import { EnhancedDate } from '@kikiutils/shared/classes/enhanced-date';
 import type {
@@ -165,7 +165,11 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     async #finalizeOutboxEventTarget(outboxEvent: LeanedJobOutboxEvent, failureReason: string, session: ClientSession) {
         switch (outboxEvent.type) {
             case JobType.SendEmail: {
-                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendEmail, outboxEvent.payload);
+                const payloadParseResult = await jobOutboxEventPayloadVariants.safeParse(
+                    JobType.SendEmail,
+                    outboxEvent.payload,
+                );
+
                 if (!payloadParseResult.success) {
                     // An invalid payload cannot identify a send record safely.
                     this.logger.error(
@@ -225,7 +229,11 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 return;
             }
             case JobType.SendSms: {
-                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendSms, outboxEvent.payload);
+                const payloadParseResult = await jobOutboxEventPayloadVariants.safeParse(
+                    JobType.SendSms,
+                    outboxEvent.payload,
+                );
+
                 if (!payloadParseResult.success) {
                     // An invalid payload cannot identify a send record safely.
                     this.logger.error(
@@ -302,7 +310,11 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
 
         switch (outboxEvent.type) {
             case JobType.SendEmail: {
-                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendEmail, outboxEvent.payload);
+                const payloadParseResult = await jobOutboxEventPayloadVariants.safeParse(
+                    JobType.SendEmail,
+                    outboxEvent.payload,
+                );
+
                 if (!payloadParseResult.success) {
                     // Retrying cannot repair an invalid payload.
                     await this.#finalizeOutboxEventFailure(outboxEvent, payloadParseResult.error);
@@ -319,7 +331,11 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 return true;
             }
             case JobType.SendSms: {
-                const payloadParseResult = await safeParseJobOutboxEventPayload(JobType.SendSms, outboxEvent.payload);
+                const payloadParseResult = await jobOutboxEventPayloadVariants.safeParse(
+                    JobType.SendSms,
+                    outboxEvent.payload,
+                );
+
                 if (!payloadParseResult.success) {
                     // Retrying cannot repair an invalid payload.
                     await this.#finalizeOutboxEventFailure(outboxEvent, payloadParseResult.error);
