@@ -172,6 +172,8 @@ v8-compile-cache*/
 .gemini/
 .junie/
 .omx/
+.omx-state-locks/
+.omx-state-locks.identity.json
 .roo/
 .serena/
 .windsurf/
