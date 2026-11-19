@@ -51,7 +51,6 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
         );
 
         if (!smsSendRecord) return;
-        // TODO: caches
         let smsProviders: LeanedSmsProvider[];
         try {
             smsProviders = await SmsProviderModel

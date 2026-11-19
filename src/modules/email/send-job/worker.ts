@@ -51,7 +51,6 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
         );
 
         if (!emailSendRecord) return;
-        // TODO: caches
         let emailProviders: LeanedEmailProvider[];
         try {
             emailProviders = await EmailProviderModel
