@@ -39,7 +39,6 @@ class SmsModule extends BaseServiceLifecycle {
             await smsSendRecordReconciler.start();
             await this.#setupSendJobQueueAndWorker();
 
-            // Start workers
             await this.#sendJobWorkerGroup.start(this.lifecycleCancellationSignal);
         });
     }

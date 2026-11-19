@@ -415,7 +415,6 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
     // Public methods
     async start() {
         return await this.executeStart(() => {
-            // Create change stream
             this.#jobOutboxEventDbChangeStream = JobOutboxEventModel.watch([{ $match: { operationType: 'insert' } }]);
             this.#jobOutboxEventDbChangeStream.on('change', () => this.#wakePublishOutboxEventLoop());
             this.#jobOutboxEventDbChangeStream.on(
@@ -426,7 +425,6 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 },
             );
 
-            // Run loop
             this.#publishLoopPromise = this.#runPublishOutboxEventLoop();
         });
     }

@@ -39,7 +39,6 @@ class EmailModule extends BaseServiceLifecycle {
             await emailSendRecordReconciler.start();
             await this.#setupSendJobQueueAndWorker();
 
-            // Start workers
             await this.#sendJobWorkerGroup.start(this.lifecycleCancellationSignal);
         });
     }
