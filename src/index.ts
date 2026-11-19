@@ -27,11 +27,8 @@ process.once('uncaughtException', handleFatalError);
 process.once('unhandledRejection', handleFatalError);
 
 // Start
-
-// Initialize system startup
 await (await import('@kcs-project/pack/init')).initializeSystemStartup();
 
-// Start main module
 if (!isShuttingDown()) {
     mainModule = (await import('@/modules/main')).mainModule;
     if (!isShuttingDown()) await mainModule.start();
