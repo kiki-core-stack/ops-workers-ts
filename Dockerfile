@@ -19,7 +19,7 @@ RUN --mount=id=bun-cache,target=/root/.bun/install/cache,type=cache \
     bun i --frozen-lockfile
 
 ## Copy application sources and build configuration
-COPY ./.env.production.local ./build.ts ./eslint.config.mjs ./.gitignore ./tsconfig.json ./
+COPY ./build.ts ./eslint.config.mjs ./.gitignore ./tsconfig.json ./
 COPY ./src ./src
 
 ## Validate and build the application, then prune development dependencies
@@ -65,6 +65,5 @@ ENV NODE_ENV='production'
 COPY --chown=10001:nogroup ./bunfig.toml ./package.json ./
 COPY --chown=10001:nogroup --from=build-stage /app/node_modules ./node_modules
 
-## Copy the application output and runtime configuration
+## Copy the application output
 COPY --chown=10001:nogroup --from=build-stage /app/dist ./
-COPY --chown=10001:nogroup ./.env.production.local ./.env
