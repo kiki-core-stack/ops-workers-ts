@@ -1,6 +1,7 @@
 import { writeSync } from 'node:fs';
 import { inspect } from 'node:util';
 
+import { wsIoClient } from '@/constants/ws.io-client';
 import {
     gracefulExit,
     isShuttingDown,
@@ -27,7 +28,11 @@ process.once('uncaughtException', handleFatalError);
 process.once('unhandledRejection', handleFatalError);
 
 // Start
-if (!isShuttingDown()) {
+await (async () => {
+    if (isShuttingDown()) return;
+    await wsIoClient.connect();
+    if (isShuttingDown()) return;
     mainModule = (await import('@/modules/main')).mainModule;
-    if (!isShuttingDown()) await mainModule.start();
-}
+    if (isShuttingDown()) return;
+    await mainModule.start();
+})();

@@ -3,6 +3,7 @@ import { withTimeout } from 'es-toolkit/promise';
 import mongoose from 'mongoose';
 
 import { bullMqRedisConnection } from '@/constants/bullmq';
+import { wsIoClient } from '@/constants/ws.io-client';
 import { logger } from '@/libs/logger';
 import type { MainModule } from '@/modules/main';
 
@@ -34,6 +35,7 @@ export async function gracefulExit(mainModule?: MainModule) {
 
                         bullMqRedisConnection.disconnect();
                         redisClient.close();
+                        await wsIoClient.disconnect().catch((error) => errors.push(error));
                         await mongoose.disconnect().catch((error) => errors.push(error));
 
                         if (errors.length) throw new AggregateError(errors, 'Resource cleanup failed');
