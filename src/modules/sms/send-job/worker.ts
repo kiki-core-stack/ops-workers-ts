@@ -144,7 +144,7 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
             );
         }
 
-        if ($set.status === SmsSendRecordStatus.Pending) throw retryableError;
+        if ($set.status === SmsSendRecordStatus.Pending && retryableError) throw retryableError;
     }
 
     return new Worker<SmsSendJobData, void>(

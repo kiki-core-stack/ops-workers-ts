@@ -144,7 +144,7 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
             );
         }
 
-        if ($set.status === EmailSendRecordStatus.Pending) throw retryableError;
+        if ($set.status === EmailSendRecordStatus.Pending && retryableError) throw retryableError;
     }
 
     return new Worker<EmailSendJobData, void>(
