@@ -28,6 +28,27 @@ type EmailSendJob = Job<EmailSendJobData, void>;
 export function createEmailSendJobBullMqWorker(logger: Logger) {
     // Functions
     const hasRetryRemaining = (job: EmailSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
+    // A provider marked as used can no longer be deleted, so each one needs marking only once per process.
+    const usedProviderIds = new Set<string>();
+
+    async function markProviderUsed(providerId: Types.ObjectId) {
+        const id = providerId.toHexString();
+        if (usedProviderIds.has(id)) return true;
+        const { matchedCount } = await EmailProviderModel.updateOne(
+            {
+                _id: providerId,
+                usedAt: { $exists: false },
+            },
+            { $set: { usedAt: new Date() } },
+            // Keeps updatedAt intact so the marker does not fail an admin's concurrent not-modified update.
+            { timestamps: false },
+        );
+
+        // No match means the provider was either already marked or deleted before this send.
+        if (!matchedCount && !await EmailProviderModel.exists({ _id: providerId })) return false;
+        usedProviderIds.add(id);
+        return true;
+    }
 
     async function processSendJob(job: EmailSendJob, signal?: AbortSignal) {
         const payloadParseResult = await jobOutboxEventPayloadVariants.safeParse(JobType.SendEmail, job.data);
@@ -90,6 +111,14 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
         if (!emailProviders.length) $set.failureReason = '沒有可用的服務商';
         else {
             for (const emailProvider of emailProviders) {
+                try {
+                    if (!await markProviderUsed(emailProvider._id)) continue;
+                } catch (error) {
+                    $set.failureReason = getErrorMessage(error);
+                    retryableError ??= error as Error;
+                    continue;
+                }
+
                 $set.provider = emailProvider._id;
                 try {
                     const emailProviderInstance = getOrCreateEmailProviderInstance(emailProvider);
@@ -109,6 +138,7 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
                 }
             }
 
+            if ($set.status === EmailSendRecordStatus.Failed) $set.failureReason ??= '沒有可用的服務商';
             if ($set.status === EmailSendRecordStatus.Failed && retryableError && hasRetryRemaining(job)) {
                 $set.status = EmailSendRecordStatus.Pending;
             }

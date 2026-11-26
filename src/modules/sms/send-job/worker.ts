@@ -28,6 +28,27 @@ type SmsSendJob = Job<SmsSendJobData, void>;
 export function createSmsSendJobBullMqWorker(logger: Logger) {
     // Functions
     const hasRetryRemaining = (job: SmsSendJob) => job.attemptsMade + 1 < (job.opts.attempts ?? 1);
+    // A provider marked as used can no longer be deleted, so each one needs marking only once per process.
+    const usedProviderIds = new Set<string>();
+
+    async function markProviderUsed(providerId: Types.ObjectId) {
+        const id = providerId.toHexString();
+        if (usedProviderIds.has(id)) return true;
+        const { matchedCount } = await SmsProviderModel.updateOne(
+            {
+                _id: providerId,
+                usedAt: { $exists: false },
+            },
+            { $set: { usedAt: new Date() } },
+            // Keeps updatedAt intact so the marker does not fail an admin's concurrent not-modified update.
+            { timestamps: false },
+        );
+
+        // No match means the provider was either already marked or deleted before this send.
+        if (!matchedCount && !await SmsProviderModel.exists({ _id: providerId })) return false;
+        usedProviderIds.add(id);
+        return true;
+    }
 
     async function processSendJob(job: SmsSendJob, signal?: AbortSignal) {
         const payloadParseResult = await jobOutboxEventPayloadVariants.safeParse(JobType.SendSms, job.data);
@@ -90,6 +111,14 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
         if (!smsProviders.length) $set.failureReason = '沒有可用的服務商';
         else {
             for (const smsProvider of smsProviders) {
+                try {
+                    if (!await markProviderUsed(smsProvider._id)) continue;
+                } catch (error) {
+                    $set.failureReason = getErrorMessage(error);
+                    retryableError ??= error as Error;
+                    continue;
+                }
+
                 $set.provider = smsProvider._id;
                 try {
                     const smsProviderInstance = getOrCreateSmsProviderInstance(smsProvider);
@@ -109,6 +138,7 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
                 }
             }
 
+            if ($set.status === SmsSendRecordStatus.Failed) $set.failureReason ??= '沒有可用的服務商';
             if ($set.status === SmsSendRecordStatus.Failed && retryableError && hasRetryRemaining(job)) {
                 $set.status = SmsSendRecordStatus.Pending;
             }
