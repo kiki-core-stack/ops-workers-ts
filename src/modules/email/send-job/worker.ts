@@ -125,6 +125,8 @@ export function createEmailSendJobBullMqWorker(logger: Logger) {
                     const sendResult = await emailProviderInstance.sendEmail(emailSendRecord, signal);
                     $set.providerTransactionId = sendResult.transactionId;
                     $set.status = EmailSendRecordStatus.Succeeded;
+                    // An earlier provider's failure may be set; MongoDB rejects setting and unsetting the same field.
+                    delete $set.failureReason;
                     $unset.failureReason = true;
                     break;
                 } catch (error) {

@@ -125,6 +125,8 @@ export function createSmsSendJobBullMqWorker(logger: Logger) {
                     const sendResult = await smsProviderInstance.sendSms(smsSendRecord, signal);
                     $set.providerTransactionId = sendResult.transactionId;
                     $set.status = SmsSendRecordStatus.Succeeded;
+                    // An earlier provider's failure may be set; MongoDB rejects setting and unsetting the same field.
+                    delete $set.failureReason;
                     $unset.failureReason = true;
                     break;
                 } catch (error) {
