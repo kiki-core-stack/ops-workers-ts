@@ -14,7 +14,7 @@
     "knip:exports": "knip --exports",
     "lint": "eslint --cache --concurrency=auto --max-warnings 0",
     "lint:fix": "eslint --cache --concurrency=auto --fix --max-warnings 0",
-    "typecheck": "tsc"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@kcs-project/pack": "git+https://github.com/kiki-core-stack/pack#840071ea46fdd148d2edee06b7641e5975a00067",
