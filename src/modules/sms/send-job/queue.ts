@@ -12,10 +12,10 @@ export const smsSendJobQueue = new Queue<SmsSendJobData, void, typeof smsSendJob
     smsSendJobQueueName,
     {
         defaultJobOptions: {
-            attempts: 3,
+            attempts: 5,
             backoff: {
-                delay: 250,
-                type: 'fixed',
+                delay: 1000,
+                type: 'exponential',
             },
             removeOnComplete: {
                 age: 60 * 60 * 24,
