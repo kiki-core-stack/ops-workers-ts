@@ -289,6 +289,16 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                         },
                     );
                 }
+
+                return;
+            }
+            default: {
+                // Fails to compile when a JobType has no case.
+                outboxEvent satisfies never;
+                this.logger.error(
+                    'Cannot finalize the target of an unhandled job outbox event type',
+                    { eventId: (outboxEvent as LeanedJobOutboxEvent)._id },
+                );
             }
         }
     }
@@ -345,6 +355,17 @@ class JobOutboxEventPublisherModule extends BaseServiceLifecycle {
                 const smsSendJobData = payloadParseResult.data;
                 await smsSendJobQueue.add(smsSendJobQueueName, smsSendJobData, { jobId: smsSendJobData.recordId });
                 return true;
+            }
+            default: {
+                // Fails to compile when a JobType has no case; retrying cannot publish an unknown type.
+                outboxEvent satisfies never;
+                const unhandledOutboxEvent = outboxEvent as LeanedJobOutboxEvent;
+                await this.#finalizeOutboxEventFailure(
+                    unhandledOutboxEvent,
+                    new Error(`Unhandled job outbox event type: ${unhandledOutboxEvent.type}`),
+                );
+
+                return false;
             }
         }
     }
